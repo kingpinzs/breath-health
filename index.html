@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced Relaxation Breathing</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#A5CFF0">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
     <style>
         /* --- Theme Variables --- */
         :root {
@@ -116,8 +120,8 @@
         .control-button.button-off:hover { background-color: var(--button-off-hover-bg); }
         #reset-button { background-color: var(--reset-button-bg); margin-top: 15px; } /* More space before reset */
         #reset-button:hover { background-color: var(--reset-button-hover-bg); }
-        #info-button { background-color: var(--info-button-bg); padding: 6px 12px; width: auto; margin-top: 0; } /* Smaller info button */
-        #info-button:hover { background-color: var(--info-button-hover-bg); }
+        #info-button, #stats-button { background-color: var(--info-button-bg); padding: 6px 12px; width: auto; margin-top: 0; } /* Smaller info button */
+        #info-button:hover, #stats-button:hover { background-color: var(--info-button-hover-bg); }
 
         /* Volume/Panning sliders */
         .slider-control input[type="range"] { cursor: pointer; width: 100%; -webkit-appearance: none; appearance: none; height: 8px; background: var(--slider-track); border-radius: 4px; outline: none; transition: background-color 0.3s ease; }
@@ -152,7 +156,7 @@
         #debug-info { margin-top: auto; padding: 8px 12px; background-color: var(--debug-bg); border-radius: 5px; font-family: monospace; font-size: 0.85rem; color: var(--debug-text); text-align: center; transition: background-color 0.3s ease, color 0.3s ease; }
 
         /* --- Instructions Modal --- */
-        #info-modal {
+        #info-modal, #stats-modal, #import-modal {
             display: none; /* Hidden by default */
             position: fixed;
             z-index: 1050; /* Above menu panel */
@@ -165,7 +169,7 @@
             justify-content: center;
             align-items: center;
         }
-        #info-modal.visible { display: flex; } /* Show modal */
+        #info-modal.visible, #stats-modal.visible, #import-modal.visible { display: flex; } /* Show modal */
 
         .modal-content {
             background-color: var(--modal-bg);
@@ -195,6 +199,8 @@
         .modal-content p, .modal-content ul { font-size: 0.95rem; line-height: 1.6; }
         .modal-content ul { padding-left: 20px; }
         /* --- End Instructions Modal --- */
+
+        /* --- Fullscreen Feature --- */
         .fullscreen-indicator {
             position: fixed;
             bottom: 15px;
@@ -222,7 +228,197 @@
             border: 2px solid white;
             border-radius: 1px;
         }
+        /* --- End Fullscreen Feature --- */
 
+        /* --- Color Picker Feature --- */
+        .color-picker-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .color-picker-group label {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        .color-picker-group input[type="color"] {
+            width: 40px;
+            height: 30px;
+            border: 1px solid var(--input-border);
+            border-radius: 4px;
+            background-color: var(--input-bg);
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        .color-picker-group input[type="color"]:focus {
+            outline: none;
+            border-color: #a5cff0;
+            box-shadow: 0 0 5px rgba(165, 207, 240, 0.6);
+        }
+
+        .color-preset-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .color-preview {
+            display: flex;
+            margin-left: 10px;
+        }
+        .color-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 3px;
+        }
+        /* --- End Color Picker Feature --- */
+
+        /* --- Stats Feature --- */
+        #stats-summary {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 28%;
+            min-width: 80px;
+            transition: background-color 0.3s ease;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 5px;
+            transition: color 0.3s ease;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--description-color);
+            transition: color 0.3s ease;
+        }
+
+        #session-history {
+            max-height: 250px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            padding: 5px;
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .session-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background-color: var(--panel-bg);
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color 0.3s ease;
+        }
+
+        .session-date, .session-technique {
+            font-size: 0.9rem;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .session-duration {
+            font-weight: bold;
+            color: var(--switch-checked-bg);
+            transition: color 0.3s ease;
+        }
+
+        .no-sessions {
+            text-align: center;
+            padding: 20px;
+            color: var(--description-color);
+            font-style: italic;
+            transition: color 0.3s ease;
+        }
+
+        #clear-stats-button {
+            background-color: var(--button-off-bg);
+            width: auto;
+            margin: 0 auto;
+            display: block;
+        }
+        #clear-stats-button:hover {
+            background-color: var(--button-off-hover-bg);
+        }
+        /* --- End Stats Feature --- */
+
+        /* --- Import Settings Feature --- */
+        #import-settings-textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 15px 0;
+            border: 1px solid var(--input-border);
+            border-radius: 5px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-family: monospace;
+            resize: vertical;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .error-message.visible {
+            display: block;
+        }
+
+        body.drag-over:after {
+            content: "Drop Settings File Here";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            z-index: 9999;
+        }
+        /* --- End Import Settings Feature --- */
+
+        /* --- Breath Indicators --- */
+        .breath-particle {
+            fill: rgba(255, 255, 255, 0.7);
+            r: 2;
+        }
+
+        .breath-guide-arrow {
+            stroke: white;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .arrow-visible {
+            opacity: 0.8;
+        }
+        /* --- End Breath Indicators --- */
     </style>
 </head>
 <body>
@@ -230,7 +426,23 @@
 
     <div id="menu-panel">
         <div class="controls">
-            <button id="info-button" class="control-button" style="width: auto; align-self: flex-end;">?</button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
+                <button id="info-button" class="control-button" style="width: auto;">?</button>
+                <button id="stats-button" class="control-button" style="width: auto;">📊</button>
+            </div>
+
+            <!-- Guided Session Presets -->
+            <div class="control-group" id="guided-session-container">
+                <label for="guided-session-select">Quick Start:</label>
+                <select id="guided-session-select">
+                    <option value="none">Custom Settings</option>
+                    <option value="sleep">Sleep Preparation</option>
+                    <option value="stress">Stress Relief</option>
+                    <option value="focus">Focus & Concentration</option>
+                    <option value="energy">Energy Boost</option>
+                    <option value="balance">Balance & Calm</option>
+                </select>
+            </div>
 
             <div class="control-group">
                 <label for="technique-select">Technique:</label>
@@ -248,9 +460,44 @@
                 <select id="visualizer-select"> <option value="circle">Circle</option> <option value="bar">Bar</option> </select>
             </div>
 
-             <div class="control-group">
+            <!-- Color Theme Selection -->
+            <div class="control-group">
+                <label for="color-theme-select">Color Theme:</label>
+                <select id="color-theme-select">
+                    <option value="default">Default Colors</option>
+                    <option value="ocean">Ocean Calm</option>
+                    <option value="forest">Forest Refresh</option>
+                    <option value="sunset">Sunset Relax</option>
+                    <option value="custom">Custom Colors</option>
+                </select>
+            </div>
+            
+            <div id="custom-colors" style="display: none; margin-top: 5px;">
+                <div class="control-group color-picker-group">
+                    <label for="inhale-color">Inhale Color:</label>
+                    <input type="color" id="inhale-color" value="#A5CFF0">
+                </div>
+                <div class="control-group color-picker-group">
+                    <label for="hold-color">Hold Color:</label>
+                    <input type="color" id="hold-color" value="#F0C8A5">
+                </div>
+                <div class="control-group color-picker-group">
+                    <label for="exhale-color">Exhale Color:</label>
+                    <input type="color" id="exhale-color" value="#A881B4">
+                </div>
+            </div>
+
+            <div class="control-group">
                 <label for="sound-type-select">Sound:</label>
-                <select id="sound-type-select"> <option value="brown">Brown Noise</option> <option value="pink">Pink Noise</option> <option value="white">White Noise</option> <option value="none">None</option> </select>
+                <select id="sound-type-select"> 
+                    <option value="brown">Brown Noise</option> 
+                    <option value="pink">Pink Noise</option> 
+                    <option value="white">White Noise</option>
+                    <option value="rain">Rain</option>
+                    <option value="ocean">Ocean Waves</option>
+                    <option value="forest">Forest</option>
+                    <option value="none">None</option>
+                </select>
             </div>
             <div class="control-group slider-control">
                  <label for="volume-slider">Volume:</label>
@@ -275,15 +522,28 @@
                  <label for="tts-switch">Speak Phases (TTS):</label>
                  <label class="switch"><input type="checkbox" id="tts-switch"><span class="slider"></span></label>
              </div>
+             
+             <!-- Breath Indicators Toggle -->
+             <div class="toggle-switch-group control-group">
+                <label for="breath-indicator-switch">Breath Indicators:</label>
+                <label class="switch"><input type="checkbox" id="breath-indicator-switch"><span class="slider"></span></label>
+             </div>
 
              <div class="control-group">
                 <label for="timer-select">Duration:</label>
                 <select id="timer-select"> <option value="0">Infinite</option> <option value="60">1 Min</option> <option value="180">3 Min</option> <option value="300">5 Min</option> <option value="600">10 Min</option> </select>
             </div>
              <div id="timer-display" style="font-size: 0.9rem; margin-top: -10px; color: var(--description-color); text-align: center;"></div>
+             
              <div class="toggle-switch-group control-group">
                  <label for="wake-lock-switch">Keep Screen Awake:</label>
                  <label class="switch"><input type="checkbox" id="wake-lock-switch"><span class="slider"></span></label>
+             </div>
+             
+             <!-- Fullscreen Toggle -->
+             <div class="toggle-switch-group control-group">
+                <label for="fullscreen-switch">Fullscreen Mode:</label>
+                <label class="switch"><input type="checkbox" id="fullscreen-switch"><span class="slider"></span></label>
              </div>
 
              <div class="control-group">
@@ -304,54 +564,139 @@
                  <label for="dark-mode-switch">Dark Mode:</label>
                  <label class="switch"><input type="checkbox" id="dark-mode-switch"><span class="slider"></span></label>
              </div>
-            <div class="toggle-switch-group control-group">
-                <label for="fullscreen-switch">Fullscreen Mode:</label>
-                <label class="switch"><input type="checkbox" id="fullscreen-switch"><span class="slider"></span></label>
-            </div>
+             
+             <!-- Export/Import Settings Buttons -->
+             <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="export-button" class="control-button" style="background-color: var(--info-button-bg);">Export Settings</button>
+                <button id="import-button" class="control-button" style="background-color: var(--info-button-bg);">Import Settings</button>
+             </div>
+             
              <button id="reset-button" class="control-button">Reset Settings</button>
         </div>
     </div>
 
+    <!-- Info Modal -->
     <div id="info-modal">
         <div class="modal-content">
             <span class="modal-close-button" id="modal-close">&times;</span>
             <h2>How to Use</h2>
             <p>This app guides your breathing to help you relax, focus, or fall asleep.</p>
             <ul>
-                <li>**Visualizer:** Follow the expanding/contracting circle or rising/falling bar.</li>
-                <li>**Text:** The words "Inhale", "Hold", and "Exhale" match the current phase.</li>
-                <li>**Sound:** Optional background noise changes tone to match the breath cycle.</li>
-                <li>**Vibration:** Optional haptic feedback signals phase changes on mobile.</li>
-                <li>**TTS:** Optional voice guidance announces each phase.</li>
-                <li>**Phrases:** Gentle reminders appear to aid focus and relaxation.</li>
+                <li><strong>Visualizer:</strong> Follow the expanding/contracting circle or rising/falling bar.</li>
+                <li><strong>Text:</strong> The words "Inhale", "Hold", and "Exhale" match the current phase.</li>
+                <li><strong>Sound:</strong> Optional background noise changes tone to match the breath cycle.</li>
+                <li><strong>Vibration:</strong> Optional haptic feedback signals phase changes on mobile.</li>
+                <li><strong>TTS:</strong> Optional voice guidance announces each phase.</li>
+                <li><strong>Phrases:</strong> Gentle reminders appear to aid focus and relaxation.</li>
             </ul>
             <h3>Settings (Menu Icon Top-Right):</h3>
             <ul>
-                <li>**Technique:** Choose pre-set breathing patterns or set custom timings.</li>
-                <li>**Visualizer:** Select Circle or Bar display.</li>
-                <li>**Sound:** Choose noise type (Brown recommended for sleep) or None. Adjust volume and stereo panning. Toggle Resonance for a different sound quality.</li>
-                <li>**Haptics/TTS:** Toggle Vibration or Text-to-Speech guidance.</li>
-                <li>**Session:** Set a duration or let it run infinitely. Toggle "Keep Screen Awake" to prevent locking during timed sessions.</li>
-                <li>**Phrases:** Select a category or input your own custom phrases (one per line).</li>
-                <li>**Dark Mode:** Switch between light and dark themes.</li>
-                <li>**Reset:** Return all settings to their defaults.</li>
+                <li><strong>Quick Start:</strong> Choose pre-configured breathing sessions for different needs.</li>
+                <li><strong>Technique:</strong> Choose pre-set breathing patterns or set custom timings.</li>
+                <li><strong>Visualizer:</strong> Select Circle or Bar display and customize colors.</li>
+                <li><strong>Sound:</strong> Choose noise type or nature sounds. Adjust volume and stereo panning. Toggle Resonance for a different sound quality.</li>
+                <li><strong>Haptics/TTS:</strong> Toggle Vibration or Text-to-Speech guidance.</li>
+                <li><strong>Breath Indicators:</strong> Show visual breath flow cues to help guide your breathing.</li>
+                <li><strong>Session:</strong> Set a duration or let it run infinitely. Toggle "Keep Screen Awake" to prevent locking during timed sessions.</li>
+                <li><strong>Fullscreen:</strong> Enable distraction-free mode.</li>
+                <li><strong>Phrases:</strong> Select a category or input your own custom phrases (one per line).</li>
+                <li><strong>Dark Mode:</strong> Switch between light and dark themes.</li>
+                <li><strong>Export/Import:</strong> Save your favorite settings to share or use on other devices.</li>
+                <li><strong>Reset:</strong> Return all settings to their defaults.</li>
             </ul>
             <p>Find a comfortable position, start the sound/vibration if desired, and gently follow the guide. Let your thoughts come and go without judgment.</p>
         </div>
     </div>
 
+    <!-- Stats Modal -->
+    <div id="stats-modal">
+        <div class="modal-content">
+            <span class="modal-close-button" id="stats-modal-close">&times;</span>
+            <h2>Breathing Practice Stats</h2>
+            <div id="stats-summary">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-sessions">0</div>
+                    <div class="stat-label">Total Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-minutes">0</div>
+                    <div class="stat-label">Total Minutes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="current-streak">0</div>
+                    <div class="stat-label">Day Streak</div>
+                </div>
+            </div>
+            <h3>Recent Sessions</h3>
+            <div id="session-history">
+                <!-- Sessions will be added here dynamically -->
+                <div class="no-sessions">No previous sessions found.</div>
+            </div>
+            <button id="clear-stats-button" class="control-button">Reset Statistics</button>
+        </div>
+    </div>
+
+    <!-- Import Settings Modal -->
+    <div id="import-modal">
+        <div class="modal-content">
+            <span class="modal-close-button" id="import-modal-close">&times;</span>
+            <h2>Import Settings</h2>
+            <p>Paste your previously exported settings below:</p>
+            <textarea id="import-settings-textarea" rows="6" placeholder="Paste settings JSON here..."></textarea>
+            <div id="import-error" class="error-message"></div>
+            <button id="confirm-import-button" class="control-button">Apply Imported Settings</button>
+        </div>
+    </div>
+
     <div class="visualizer-container">
-         <div class="animated-circle"></div> <div class="animated-bar-container"> <div class="animated-bar"></div> </div>
-         <span id="breath-text">Starting...</span> </div>
+        <!-- Breath Indicators SVG -->
+        <svg id="breath-indicator" width="160" height="160" viewBox="0 0 160 160" style="position: absolute; z-index: 5; opacity: 0.7;">
+            <!-- Breath flow indicators will be added here dynamically -->
+        </svg>
+         <div class="animated-circle"></div> 
+         <div class="animated-bar-container"> 
+            <div class="animated-bar"></div> 
+         </div>
+         <span id="breath-text">Starting...</span> 
+    </div>
     <div id="calm-phrase"></div>
     <div id="debug-info">Select a technique</div>
 
     <script>
         // --- Configuration ---
         const defaultSettings = {
-            technique: 'default', volume: -25, soundType: 'brown', visualizer: 'circle',
-            vibration: false, theme: 'light', timer: 0, customInhale: 4, customHold: 7, customExhale: 8,
-            panning: 0, qMod: false, wakeLock: false, phraseCategory: 'general', customPhrases: '', tts: false
+            technique: 'default', 
+            volume: -25, 
+            soundType: 'brown', 
+            visualizer: 'circle',
+            vibration: false, 
+            theme: 'light', 
+            timer: 0, 
+            customInhale: 4, 
+            customHold: 7, 
+            customExhale: 8,
+            panning: 0, 
+            qMod: false, 
+            wakeLock: false, 
+            phraseCategory: 'general', 
+            customPhrases: '', 
+            tts: false,
+            fullscreen: false,
+            breathIndicators: true,
+            colorTheme: 'default',
+            customColors: {
+                inhale: '#A5CFF0',
+                hold: '#F0C8A5',
+                exhale: '#A881B4'
+            },
+            // Session Stats initialized later
+            sessionStats: {
+                totalSessions: 0,
+                totalSeconds: 0,
+                lastSessionDate: null,
+                currentStreak: 0,
+                sessions: []
+            }
         };
 
         const techniques = {
@@ -373,14 +718,213 @@
         const vibrateInhale = [100]; const vibrateHold = [150]; const vibrateExhale = [80, 70, 80];
         const fadeOutDuration = 3000; // 3 seconds fade out
 
+        // --- Nature Sound URLs ---
+        const natureSoundURLs = {
+            rain: 'https://cdn.freesound.org/previews/346/346170_984468-lq.mp3',
+            ocean: 'https://cdn.freesound.org/previews/537/537091_5312119-lq.mp3',
+            forest: 'https://cdn.freesound.org/previews/197/197784_1027360-lq.mp3'
+        };
+
+        // --- Color Theme Presets ---
+        const colorThemes = {
+            default: {
+                inhale: '#A5CFF0',
+                hold: '#F0C8A5',
+                exhale: '#A881B4'
+            },
+            ocean: {
+                inhale: '#62B6CB',
+                hold: '#5FA8D3',
+                exhale: '#1B4965'
+            },
+            forest: {
+                inhale: '#6BAB90',
+                hold: '#A4C09A',
+                exhale: '#3A5743'
+            },
+            sunset: {
+                inhale: '#F9C784',
+                hold: '#FC9F5B',
+                exhale: '#FF6B6B'
+            }
+        };
+
+        // --- Guided Session Presets ---
+        const guidedSessionPresets = {
+            sleep: {
+                name: "Sleep Preparation",
+                description: "Slower breathing pattern to prepare your mind and body for sleep",
+                technique: "default", // 4-7-8
+                soundType: "brown",
+                volume: -30,
+                timer: 600, // 10 minutes
+                visualizer: "circle",
+                phraseCategory: "sleep",
+                theme: "dark",
+                vibration: false,
+                tts: false,
+                panning: 0,
+                qMod: true,
+                wakeLock: true
+            },
+            stress: {
+                name: "Stress Relief",
+                description: "Balanced technique to reduce anxiety and tension",
+                technique: "relax", // 4-2-6
+                soundType: "forest",
+                volume: -25,
+                timer: 300, // 5 minutes
+                visualizer: "circle",
+                phraseCategory: "anxiety",
+                theme: "light", // Lighter theme for stress reduction
+                vibration: true,
+                tts: true,
+                panning: 0,
+                qMod: false,
+                wakeLock: true
+            },
+            focus: {
+                name: "Focus & Concentration",
+                description: "Rhythmic breathing to enhance alertness and mental clarity",
+                technique: "box", // 4-4-4
+                soundType: "pink",
+                volume: -20,
+                timer: 180, // 3 minutes
+                visualizer: "bar", // Bar visualization for focus
+                phraseCategory: "general",
+                theme: "light",
+                vibration: true,
+                tts: false,
+                panning: 0,
+                qMod: false,
+                wakeLock: true
+            },
+            energy: {
+                name: "Energy Boost",
+                description: "Energizing breath pattern for a natural way to increase alertness",
+                technique: "custom",
+                customInhale: 4,
+                customHold: 0,
+                customExhale: 4,
+                soundType: "white",
+                volume: -20,
+                timer: 60, // 1 minute
+                visualizer: "bar",
+                phraseCategory: "general",
+                theme: "light",
+                vibration: true,
+                tts: true,
+                panning: 0,
+                qMod: false,
+                wakeLock: true
+            },
+            balance: {
+                name: "Balance & Calm",
+                description: "Resonant breathing for nervous system balance and heart rate variability",
+                technique: "resonant", // 5.5-5.5
+                soundType: "ocean",
+                volume: -25,
+                timer: 300, // 5 minutes
+                visualizer: "circle",
+                phraseCategory: "general",
+                theme: "light",
+                vibration: false,
+                tts: false,
+                panning: 0,
+                qMod: true,
+                wakeLock: true
+            }
+        };
+
         // --- Get DOM Elements ---
-        const animatedCircle = document.querySelector('.animated-circle'); const animatedBarContainer = document.querySelector('.animated-bar-container'); const animatedBar = document.querySelector('.animated-bar'); const breathText = document.getElementById('breath-text'); const debugInfo = document.getElementById('debug-info'); const techniqueSelect = document.getElementById('technique-select'); const techniqueDescription = document.getElementById('technique-description'); const customTimingInputsDiv = document.getElementById('custom-timing-inputs'); const customInhaleInput = document.getElementById('custom-inhale'); const customHoldInput = document.getElementById('custom-hold'); const customExhaleInput = document.getElementById('custom-exhale'); const visualizerSelect = document.getElementById('visualizer-select'); const soundTypeSelect = document.getElementById('sound-type-select'); const soundToggleButton = document.getElementById('sound-toggle-button'); const volumeSlider = document.getElementById('volume-slider'); const panningSlider = document.getElementById('panning-slider'); const qModSwitch = document.getElementById('q-mod-switch'); const timerSelect = document.getElementById('timer-select'); const timerDisplay = document.getElementById('timer-display'); const calmPhraseElement = document.getElementById('calm-phrase'); const menuToggle = document.getElementById('menu-toggle'); const menuPanel = document.getElementById('menu-panel'); const bodyElement = document.body; const darkModeSwitch = document.getElementById('dark-mode-switch'); const vibrationSwitch = document.getElementById('vibration-switch'); const ttsSwitch = document.getElementById('tts-switch'); const wakeLockSwitch = document.getElementById('wake-lock-switch'); const resetButton = document.getElementById('reset-button'); const infoButton = document.getElementById('info-button'); const infoModal = document.getElementById('info-modal'); const modalCloseButton = document.getElementById('modal-close'); const phraseCategorySelect = document.getElementById('phrase-category-select'); const customPhrasesInputDiv = document.getElementById('custom-phrases-input'); const customPhrasesTextarea = document.getElementById('custom-phrases');
+        const animatedCircle = document.querySelector('.animated-circle'); 
+        const animatedBarContainer = document.querySelector('.animated-bar-container'); 
+        const animatedBar = document.querySelector('.animated-bar'); 
+        const breathText = document.getElementById('breath-text'); 
+        const debugInfo = document.getElementById('debug-info'); 
+        const techniqueSelect = document.getElementById('technique-select'); 
+        const techniqueDescription = document.getElementById('technique-description'); 
+        const customTimingInputsDiv = document.getElementById('custom-timing-inputs'); 
+        const customInhaleInput = document.getElementById('custom-inhale'); 
+        const customHoldInput = document.getElementById('custom-hold'); 
+        const customExhaleInput = document.getElementById('custom-exhale'); 
+        const visualizerSelect = document.getElementById('visualizer-select'); 
+        const soundTypeSelect = document.getElementById('sound-type-select'); 
+        const soundToggleButton = document.getElementById('sound-toggle-button'); 
+        const volumeSlider = document.getElementById('volume-slider'); 
+        const panningSlider = document.getElementById('panning-slider'); 
+        const qModSwitch = document.getElementById('q-mod-switch'); 
+        const timerSelect = document.getElementById('timer-select'); 
+        const timerDisplay = document.getElementById('timer-display'); 
+        const calmPhraseElement = document.getElementById('calm-phrase'); 
+        const menuToggle = document.getElementById('menu-toggle'); 
+        const menuPanel = document.getElementById('menu-panel'); 
+        const bodyElement = document.body; 
+        const darkModeSwitch = document.getElementById('dark-mode-switch'); 
+        const vibrationSwitch = document.getElementById('vibration-switch'); 
+        const ttsSwitch = document.getElementById('tts-switch'); 
+        const wakeLockSwitch = document.getElementById('wake-lock-switch'); 
+        const resetButton = document.getElementById('reset-button'); 
+        const infoButton = document.getElementById('info-button'); 
+        const infoModal = document.getElementById('info-modal'); 
+        const modalCloseButton = document.getElementById('modal-close'); 
+        const phraseCategorySelect = document.getElementById('phrase-category-select'); 
+        const customPhrasesInputDiv = document.getElementById('custom-phrases-input'); 
+        const customPhrasesTextarea = document.getElementById('custom-phrases');
+        
+        // --- New UI Elements ---
+        const guidedSessionSelect = document.getElementById('guided-session-select');
+        const colorThemeSelect = document.getElementById('color-theme-select');
+        const inhaleColorInput = document.getElementById('inhale-color');
+        const holdColorInput = document.getElementById('hold-color');
+        const exhaleColorInput = document.getElementById('exhale-color');
+        const customColorsDiv = document.getElementById('custom-colors');
+        const fullscreenSwitch = document.getElementById('fullscreen-switch');
+        const breathIndicatorSwitch = document.getElementById('breath-indicator-switch');
+        const breathIndicatorSVG = document.getElementById('breath-indicator');
+        const statsButton = document.getElementById('stats-button');
+        const statsModal = document.getElementById('stats-modal');
+        const statsModalClose = document.getElementById('stats-modal-close');
+        const totalSessionsElement = document.getElementById('total-sessions');
+        const totalMinutesElement = document.getElementById('total-minutes');
+        const currentStreakElement = document.getElementById('current-streak');
+        const sessionHistoryElement = document.getElementById('session-history');
+        const clearStatsButton = document.getElementById('clear-stats-button');
+        const exportButton = document.getElementById('export-button');
+        const importButton = document.getElementById('import-button');
+        const importModal = document.getElementById('import-modal');
+        const importModalClose = document.getElementById('import-modal-close');
+        const importSettingsTextarea = document.getElementById('import-settings-textarea');
+        const importError = document.getElementById('import-error');
+        const confirmImportButton = document.getElementById('confirm-import-button');
 
         // --- State Variables ---
-        let appState = {}; let startTime = performance.now(); let animationFrameId = null; let toneStarted = false; let synth = null; let panner = null; // Added panner
-        let previousPhase = ''; const vibrationApiSupported = 'vibrate' in navigator; const ttsApiSupported = 'speechSynthesis' in window; const wakeLockApiSupported = 'wakeLock' in navigator;
-        let sessionEndTime = 0; let timerIntervalId = null; let wakeLock = null; // Wake lock sentinel
+        let appState = {}; 
+        let startTime = performance.now(); 
+        let animationFrameId = null; 
+        let toneStarted = false; 
+        let synth = null; 
+        let panner = null; 
+        let player = null; 
+        let filter = null;
+        let previousPhase = ''; 
+        const vibrationApiSupported = 'vibrate' in navigator; 
+        const ttsApiSupported = 'speechSynthesis' in window; 
+        const wakeLockApiSupported = 'wakeLock' in navigator;
+        let sessionEndTime = 0; 
+        let timerIntervalId = null; 
+        let wakeLock = null; // Wake lock sentinel
         let isFadingOut = false; // Flag for end-of-session fade
+        let fullscreenIndicator = null; // Fullscreen exit indicator
+        
+        // --- Session Variables ---
+        let sessionStartTime = 0;
+        let sessionActive = false;
+        let sessionTechnique = '';
+        let sessionDuration = 0;
+        
+        // --- Deferred PWA Install Prompt ---
+        let deferredPrompt;
 
         // --- Utility Functions ---
         function lerp(start, end, amount) { const clampedAmount = Math.max(0, Math.min(1, amount)); return start + (end - start) * clampedAmount; }
@@ -391,45 +935,263 @@
 
         // --- Settings Management ---
         function saveState() { localStorage.setItem('breathingAppState', JSON.stringify(appState)); console.log("State saved:", appState); }
-        function loadState() { const savedState = localStorage.getItem('breathingAppState'); appState = savedState ? JSON.parse(savedState) : { ...defaultSettings }; for (const key in defaultSettings) { if (!(key in appState)) { appState[key] = defaultSettings[key]; } } console.log("State loaded:", appState); }
-        function applyStateToUI() {
-            techniqueSelect.value = appState.technique; volumeSlider.value = appState.volume; soundTypeSelect.value = appState.soundType; visualizerSelect.value = appState.visualizer; timerSelect.value = appState.timer; customInhaleInput.value = appState.customInhale; customHoldInput.value = appState.customHold; customExhaleInput.value = appState.customExhale; panningSlider.value = appState.panning; qModSwitch.checked = appState.qMod; wakeLockSwitch.checked = appState.wakeLock; phraseCategorySelect.value = appState.phraseCategory; customPhrasesTextarea.value = appState.customPhrases; ttsSwitch.checked = appState.tts;
-            applyTheme(appState.theme);
-            if (vibrationApiSupported) { applyVibrationSetting(appState.vibration); } else { applyVibrationSetting(false); }
-            if (!ttsApiSupported) { applyTTSSettings(false); ttsSwitch.closest('.toggle-switch-group').style.opacity = '0.5'; ttsSwitch.closest('.toggle-switch-group').style.pointerEvents = 'none'; } else { applyTTSSettings(appState.tts); }
-            if (!wakeLockApiSupported) { applyWakeLockSetting(false); wakeLockSwitch.closest('.toggle-switch-group').style.opacity = '0.5'; wakeLockSwitch.closest('.toggle-switch-group').style.pointerEvents = 'none';} else { applyWakeLockSetting(appState.wakeLock); }
-            updateTechniqueDetails(); updateVolume(); updatePanning(); updateVisualizer(); updateTimerDisplay(); updatePhraseList();
-            if (appState.soundEnabled && appState.soundType !== 'none') { soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off'); } else { soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); }
+        function loadState() { 
+            const savedState = localStorage.getItem('breathingAppState'); 
+            appState = savedState ? JSON.parse(savedState) : { ...defaultSettings }; 
+            for (const key in defaultSettings) { 
+                if (!(key in appState)) { 
+                    appState[key] = defaultSettings[key]; 
+                } 
+            } 
+            
+            // Ensure backward compatibility with new features
+            if (!appState.sessionStats) {
+                appState.sessionStats = { ...defaultSettings.sessionStats };
+            }
+            if (!appState.colorTheme) {
+                appState.colorTheme = defaultSettings.colorTheme;
+            }
+            if (!appState.customColors) {
+                appState.customColors = { ...defaultSettings.customColors };
+            }
+            if (appState.breathIndicators === undefined) {
+                appState.breathIndicators = defaultSettings.breathIndicators;
+            }
+            if (appState.fullscreen === undefined) {
+                appState.fullscreen = defaultSettings.fullscreen;
+            }
+            
+            console.log("State loaded:", appState); 
         }
-        function resetToDefaults() { if (animationFrameId) cancelAnimationFrame(animationFrameId); stopSound(); stopVibration(); releaseWakeLock(); appState = { ...defaultSettings }; saveState(); applyStateToUI(); startTime = performance.now(); sessionEndTime = 0; previousPhase = ''; showNewPhrase = true; calmPhraseElement.classList.remove('visible'); calmPhraseElement.textContent = ''; bodyElement.classList.remove('menu-open'); animationFrameId = requestAnimationFrame(animate); console.log("Settings reset to defaults."); }
+        
+        function applyStateToUI() {
+            techniqueSelect.value = appState.technique; 
+            volumeSlider.value = appState.volume; 
+            soundTypeSelect.value = appState.soundType; 
+            visualizerSelect.value = appState.visualizer; 
+            timerSelect.value = appState.timer; 
+            customInhaleInput.value = appState.customInhale; 
+            customHoldInput.value = appState.customHold; 
+            customExhaleInput.value = appState.customExhale; 
+            panningSlider.value = appState.panning; 
+            qModSwitch.checked = appState.qMod; 
+            wakeLockSwitch.checked = appState.wakeLock; 
+            phraseCategorySelect.value = appState.phraseCategory; 
+            customPhrasesTextarea.value = appState.customPhrases; 
+            ttsSwitch.checked = appState.tts;
+            colorThemeSelect.value = appState.colorTheme;
+            breathIndicatorSwitch.checked = appState.breathIndicators;
+            fullscreenSwitch.checked = appState.fullscreen;
+            
+            applyTheme(appState.theme);
+            applyColorTheme(appState.colorTheme);
+            applyBreathIndicatorSetting(appState.breathIndicators);
+            applyFullscreenSetting(appState.fullscreen);
+            
+            if (vibrationApiSupported) { 
+                applyVibrationSetting(appState.vibration); 
+            } else { 
+                applyVibrationSetting(false); 
+            }
+            
+            if (!ttsApiSupported) { 
+                applyTTSSettings(false); 
+                ttsSwitch.closest('.toggle-switch-group').style.opacity = '0.5'; 
+                ttsSwitch.closest('.toggle-switch-group').style.pointerEvents = 'none'; 
+            } else { 
+                applyTTSSettings(appState.tts); 
+            }
+            
+            if (!wakeLockApiSupported) { 
+                applyWakeLockSetting(false); 
+                wakeLockSwitch.closest('.toggle-switch-group').style.opacity = '0.5'; 
+                wakeLockSwitch.closest('.toggle-switch-group').style.pointerEvents = 'none';
+            } else { 
+                applyWakeLockSetting(appState.wakeLock); 
+            }
+            
+            updateTechniqueDetails(); 
+            updateVolume(); 
+            updatePanning(); 
+            updateVisualizer(); 
+            updateTimerDisplay(); 
+            updatePhraseList();
+            
+            if (appState.soundEnabled && appState.soundType !== 'none') { 
+                soundToggleButton.textContent = 'Stop Sound'; 
+                soundToggleButton.classList.remove('button-off'); 
+            } else { 
+                soundToggleButton.textContent = 'Start Sound'; 
+                soundToggleButton.classList.add('button-off'); 
+            }
+        }
+        
+        function resetToDefaults() { 
+            if (animationFrameId) cancelAnimationFrame(animationFrameId); 
+            stopSound(); 
+            stopVibration(); 
+            releaseWakeLock(); 
+            
+            // Keep session stats when resetting
+            const originalStats = appState.sessionStats;
+            
+            appState = { ...defaultSettings }; 
+            appState.sessionStats = originalStats;
+            
+            saveState(); 
+            applyStateToUI(); 
+            startTime = performance.now(); 
+            sessionEndTime = 0; 
+            previousPhase = ''; 
+            showNewPhrase = true; 
+            calmPhraseElement.classList.remove('visible'); 
+            calmPhraseElement.textContent = ''; 
+            bodyElement.classList.remove('menu-open'); 
+            animationFrameId = requestAnimationFrame(animate); 
+            console.log("Settings reset to defaults."); 
+        }
 
         // --- Populate Select Options ---
-        function populateOptions() { techniqueSelect.innerHTML = ''; for (const key in techniques) { const option = document.createElement('option'); option.value = key; option.textContent = techniques[key].name; techniqueSelect.appendChild(option); } /* Other selects populated in HTML */ }
+        function populateOptions() { 
+            techniqueSelect.innerHTML = ''; 
+            for (const key in techniques) { 
+                const option = document.createElement('option'); 
+                option.value = key; 
+                option.textContent = techniques[key].name; 
+                techniqueSelect.appendChild(option); 
+            } 
+        }
 
         // --- Initialize Sound ---
         function initializeSound(noiseTypeValue = appState.soundType) {
-             if(noiseTypeValue === 'none') { if(synth) { synth.dispose(); synth = null; } if(panner) { panner.dispose(); panner = null; } console.log("Sound type set to None."); return; }
-             if(synth && (!synth.noise || synth.noise.type !== noiseTypeValue)) { synth.dispose(); synth = null; if(panner) { panner.dispose(); panner = null;} } // Dispose panner too
+            if(noiseTypeValue === 'none') { 
+                if(synth) { synth.dispose(); synth = null; } 
+                if(panner) { panner.dispose(); panner = null; } 
+                if(player) { player.stop(); player.dispose(); player = null; }
+                console.log("Sound type set to None."); 
+                return; 
+            }
+            
+            // Handle nature sounds with audio files
+            if(['rain', 'ocean', 'forest'].includes(noiseTypeValue)) {
+                if(synth) { synth.dispose(); synth = null; }
+                
+                // Create or update player
+                if(!player || player.state === 'stopped') {
+                    player = new Tone.Player({
+                        url: natureSoundURLs[noiseTypeValue],
+                        loop: true,
+                        volume: appState.volume,
+                        fadeIn: 0.5,
+                        fadeOut: 0.5
+                    }).toDestination();
+                    
+                    // Create filter for natural sounds
+                    filter = new Tone.Filter({
+                        frequency: soundConfig.filterFreqBase,
+                        type: "lowpass",
+                        Q: soundConfig.filterQBase,
+                        rolloff: -12
+                    });
+                    
+                    // Connect player to filter and filter to destination
+                    panner = new Tone.Panner(appState.panning).toDestination();
+                    player.chain(filter, panner);
+                    
+                    console.log(`Player created: Type=${noiseTypeValue}`);
+                }
+                
+                return;
+            }
+            
+            // Handle classic noise types
+            if(synth && (!synth.noise || synth.noise.type !== noiseTypeValue)) { 
+                synth.dispose(); synth = null; 
+                if(panner) { panner.dispose(); panner = null; } 
+            }
+            
             if (!synth) {
-                 synth = new Tone.NoiseSynth({ noise: { type: noiseTypeValue }, envelope: { attack: 0.6, decay: 0.1, sustain: 1.0, release: 1.0 }, filterEnvelope: { baseFrequency: soundConfig.filterFreqBase, octaves: 0, attack: 0.02, release: 0.2, filter: { Q: soundConfig.filterQBase } }, volume: -100 }).toDestination(); // Start muted initially, volume set by slider later
-                 panner = new Tone.Panner(appState.panning).toDestination(); // Create panner
-                 synth.connect(panner); // Connect synth to panner, panner to destination
-                 updateVolume(); // Apply initial volume
-                 console.log(`NoiseSynth created/updated: Type=${noiseTypeValue}, Q=${soundConfig.filterQBase}`);
+                synth = new Tone.NoiseSynth({ 
+                    noise: { type: noiseTypeValue }, 
+                    envelope: { attack: 0.6, decay: 0.1, sustain: 1.0, release: 1.0 }, 
+                    filterEnvelope: { 
+                        baseFrequency: soundConfig.filterFreqBase, 
+                        octaves: 0, 
+                        attack: 0.02, 
+                        release: 0.2, 
+                        filter: { Q: soundConfig.filterQBase } 
+                    }, 
+                    volume: -100 // Start muted initially
+                }).toDestination(); 
+                
+                panner = new Tone.Panner(appState.panning).toDestination(); 
+                synth.connect(panner); 
+                updateVolume(); 
+                console.log(`NoiseSynth created/updated: Type=${noiseTypeValue}, Q=${soundConfig.filterQBase}`);
             }
         }
 
         // --- Sound Control ---
-        function startSound() { if (!appState.soundEnabled && synth && synth.state !== 'started' && appState.soundType !== 'none') { synth.triggerAttack(Tone.now()); console.log("Sound Enabled - Triggering Attack"); appState.soundEnabled = true; soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off'); } else if(appState.soundType === 'none') { console.log("Cannot start sound, type is None."); } }
+        function startSound() { 
+            if (!appState.soundEnabled && appState.soundType !== 'none') { 
+                if(['rain', 'ocean', 'forest'].includes(appState.soundType)) {
+                    if(player && player.state !== 'started') {
+                        player.start();
+                        console.log("Natural Sound Started");
+                    } else if (!player) {
+                        initializeSound(appState.soundType);
+                        if(player) player.start();
+                    }
+                } else if(synth && synth.state !== 'started') {
+                    synth.triggerAttack(Tone.now());
+                    console.log("Noise Synth Started");
+                }
+                
+                appState.soundEnabled = true;
+                soundToggleButton.textContent = 'Stop Sound';
+                soundToggleButton.classList.remove('button-off');
+            } else if(appState.soundType === 'none') { 
+                console.log("Cannot start sound, type is None."); 
+            } 
+        }
+        
         function stopSound(immediate = false) {
-            const releaseTime = immediate ? Tone.now() : Tone.now() + 0.5; // Slightly longer default release
-            if (appState.soundEnabled && synth && synth.state === 'started') { synth.triggerRelease(releaseTime); console.log("Sound Disabled - Triggering Release"); appState.soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); }
-            if(appState.soundEnabled) { appState.soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } // Ensure state consistency
+            const releaseTime = immediate ? 0 : 0.5;
+            
+            if (appState.soundEnabled) {
+                if(player && player.state === 'started') {
+                    player.stop(immediate ? undefined : "+0.5");
+                    console.log("Natural Sound Stopped");
+                }
+                
+                if(synth && synth.state === 'started') {
+                    synth.triggerRelease(Tone.now() + releaseTime);
+                    console.log("Noise Synth Stopped");
+                }
+                
+                appState.soundEnabled = false;
+                soundToggleButton.textContent = 'Start Sound';
+                soundToggleButton.classList.add('button-off');
+            }
         }
 
         // --- Vibration Control ---
-        function triggerVibration(pattern) { if (appState.vibration && vibrationApiSupported) { try { navigator.vibrate(pattern); console.log("Vibrating:", pattern); } catch (e) { console.error("Vibration failed:", e); } } }
-        function stopVibration() { if (vibrationApiSupported) { navigator.vibrate(0); } }
+        function triggerVibration(pattern) { 
+            if (appState.vibration && vibrationApiSupported) { 
+                try { 
+                    navigator.vibrate(pattern); 
+                    console.log("Vibrating:", pattern); 
+                } catch (e) { 
+                    console.error("Vibration failed:", e); 
+                } 
+            } 
+        }
+        
+        function stopVibration() { 
+            if (vibrationApiSupported) { 
+                navigator.vibrate(0); 
+            } 
+        }
 
         // --- TTS Control ---
         function speakPhase(text) {
@@ -442,33 +1204,720 @@
                 console.log("TTS Speaking:", text);
             }
         }
-        function stopTTS() { if (ttsApiSupported) { speechSynthesis.cancel(); } }
+        
+        function stopTTS() { 
+            if (ttsApiSupported) { 
+                speechSynthesis.cancel(); 
+            } 
+        }
 
         // --- Screen Wake Lock ---
         async function requestWakeLock() {
             if (wakeLockApiSupported && appState.wakeLock) {
                 try {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    wakeLock.addEventListener('release', () => { console.log('Screen Wake Lock released:', wakeLock); wakeLock = null; });
+                    wakeLock.addEventListener('release', () => { 
+                        console.log('Screen Wake Lock released:', wakeLock); 
+                        wakeLock = null; 
+                    });
                     console.log('Screen Wake Lock requested:', wakeLock);
-                } catch (err) { console.error(`${err.name}, ${err.message}`); wakeLock = null; }
+                } catch (err) { 
+                    console.error(`${err.name}, ${err.message}`); 
+                    wakeLock = null; 
+                }
             }
         }
+        
         async function releaseWakeLock() {
             if (wakeLock !== null) {
-                try { await wakeLock.release(); wakeLock = null; console.log('Screen Wake Lock released manually.'); }
-                catch (err) { console.error(`Wake Lock release failed: ${err.name}, ${err.message}`); }
+                try { 
+                    await wakeLock.release(); 
+                    wakeLock = null; 
+                    console.log('Screen Wake Lock released manually.'); 
+                }
+                catch (err) { 
+                    console.error(`Wake Lock release failed: ${err.name}, ${err.message}`); 
+                }
             }
         }
+        
         // Re-acquire wake lock on visibility change
-        document.addEventListener('visibilitychange', async () => { if (wakeLock === null && document.visibilityState === 'visible') { await requestWakeLock(); } });
+        document.addEventListener('visibilitychange', async () => { 
+            if (wakeLock === null && document.visibilityState === 'visible') { 
+                await requestWakeLock(); 
+            } 
+        });
+
+        // --- Fullscreen Mode ---
+        function createFullscreenIndicator() {
+            if (fullscreenIndicator) return;
+            fullscreenIndicator = document.createElement('div');
+            fullscreenIndicator.className = 'fullscreen-indicator';
+            fullscreenIndicator.title = 'Exit Fullscreen (or press Esc)';
+            fullscreenIndicator.addEventListener('click', toggleFullscreen);
+            document.body.appendChild(fullscreenIndicator);
+        }
+
+        function removeFullscreenIndicator() {
+            if (fullscreenIndicator) {
+                fullscreenIndicator.remove();
+                fullscreenIndicator = null;
+            }
+        }
+
+        async function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                try {
+                    await document.documentElement.requestFullscreen();
+                    createFullscreenIndicator();
+                    if (fullscreenSwitch) fullscreenSwitch.checked = true;
+                    bodyElement.classList.remove('menu-open'); // Close menu when entering fullscreen
+                } catch (e) {
+                    console.error('Fullscreen request failed:', e);
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    removeFullscreenIndicator();
+                    if (fullscreenSwitch) fullscreenSwitch.checked = false;
+                }
+            }
+        }
+
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                removeFullscreenIndicator();
+                if (fullscreenSwitch) fullscreenSwitch.checked = false;
+            } else {
+                createFullscreenIndicator();
+                if (fullscreenSwitch) fullscreenSwitch.checked = true;
+            }
+        });
+
+        function applyFullscreenSetting(enabled) {
+            appState.fullscreen = enabled;
+            if (enabled && !document.fullscreenElement) {
+                toggleFullscreen();
+            } else if (!enabled && document.fullscreenElement) {
+                toggleFullscreen();
+            }
+        }
+
+        // --- Breath Indicators ---
+        class BreathParticleSystem {
+            constructor(svg) {
+                this.svg = svg;
+                this.particles = [];
+                this.arrowsCreated = false;
+                this.active = false;
+                this.phase = '';
+            }
+            
+            initialize() {
+                // Create guiding arrows for inhale and exhale
+                if (!this.arrowsCreated) {
+                    // Inhale arrows (pointing inward from various angles)
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i * 45) * Math.PI / 180;
+                        const startX = 80 + Math.cos(angle) * 70;
+                        const startY = 80 + Math.sin(angle) * 70;
+                        const endX = 80 + Math.cos(angle) * 50;
+                        const endY = 80 + Math.sin(angle) * 50;
+                        
+                        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        arrow.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
+                        arrow.setAttribute("class", "breath-guide-arrow inhale-arrow");
+                        arrow.setAttribute("marker-end", "url(#arrowhead)");
+                        this.svg.appendChild(arrow);
+                    }
+                    
+                    // Exhale arrows (pointing outward from various angles)
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i * 45) * Math.PI / 180;
+                        const startX = 80 + Math.cos(angle) * 40;
+                        const startY = 80 + Math.sin(angle) * 40;
+                        const endX = 80 + Math.cos(angle) * 60;
+                        const endY = 80 + Math.sin(angle) * 60;
+                        
+                        const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        arrow.setAttribute("d", `M ${startX} ${startY} L ${endX} ${endY}`);
+                        arrow.setAttribute("class", "breath-guide-arrow exhale-arrow");
+                        arrow.setAttribute("marker-end", "url(#arrowhead)");
+                        this.svg.appendChild(arrow);
+                    }
+                    
+                    // Add arrowhead marker definition
+                    const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+                    const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
+                    marker.setAttribute("id", "arrowhead");
+                    marker.setAttribute("markerWidth", "10");
+                    marker.setAttribute("markerHeight", "7");
+                    marker.setAttribute("refX", "0");
+                    marker.setAttribute("refY", "3.5");
+                    marker.setAttribute("orient", "auto");
+                    
+                    const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+                    polygon.setAttribute("points", "0 0, 10 3.5, 0 7");
+                    polygon.setAttribute("fill", "white");
+                    
+                    marker.appendChild(polygon);
+                    defs.appendChild(marker);
+                    this.svg.appendChild(defs);
+                    
+                    this.arrowsCreated = true;
+                }
+            }
+            
+            setPhase(phase) {
+                if (phase === this.phase) return;
+                this.phase = phase;
+                
+                // Update arrow visibility based on phase
+                const inhaleArrows = this.svg.querySelectorAll('.inhale-arrow');
+                const exhaleArrows = this.svg.querySelectorAll('.exhale-arrow');
+                
+                inhaleArrows.forEach(arrow => {
+                    arrow.classList.remove('arrow-visible');
+                    if (this.phase === 'Inhale') {
+                        arrow.classList.add('arrow-visible');
+                    }
+                });
+                
+                exhaleArrows.forEach(arrow => {
+                    arrow.classList.remove('arrow-visible');
+                    if (this.phase === 'Exhale') {
+                        arrow.classList.add('arrow-visible');
+                    }
+                });
+                
+                // Clear particles when phase changes
+                this.clearParticles();
+            }
+            
+            createParticle() {
+                if (!this.active || !appState.breathIndicators) return;
+                
+                // Don't create particles during hold phase
+                if (this.phase === 'Hold') return;
+                
+                const particle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                particle.setAttribute("class", "breath-particle");
+                
+                // Set initial position based on phase
+                let x, y, vx, vy;
+                const angle = Math.random() * Math.PI * 2;
+                
+                if (this.phase === 'Inhale') {
+                    // Start particles at the edge and move toward center
+                    const radius = 70 + Math.random() * 10;
+                    x = 80 + Math.cos(angle) * radius;
+                    y = 80 + Math.sin(angle) * radius;
+                    
+                    // Calculate velocity toward center
+                    const speed = 0.5 + Math.random() * 0.5;
+                    vx = (80 - x) / radius * speed;
+                    vy = (80 - y) / radius * speed;
+                } else { // Exhale
+                    // Start particles near center and move outward
+                    const radius = 30 + Math.random() * 10;
+                    x = 80 + Math.cos(angle) * radius;
+                    y = 80 + Math.sin(angle) * radius;
+                    
+                    // Calculate velocity away from center
+                    const speed = 0.5 + Math.random() * 0.5;
+                    vx = (x - 80) / radius * speed;
+                    vy = (y - 80) / radius * speed;
+                }
+                
+                particle.setAttribute("cx", x);
+                particle.setAttribute("cy", y);
+                
+                // Store velocity in the particle object
+                particle.vx = vx;
+                particle.vy = vy;
+                
+                // Add to the SVG
+                this.svg.appendChild(particle);
+                
+                // Add to our particles array
+                this.particles.push(particle);
+                
+                // Limit total particles
+                if (this.particles.length > 50) {
+                    const oldParticle = this.particles.shift();
+                    oldParticle.remove();
+                }
+            }
+            
+            updateParticles() {
+                if (!this.active || !appState.breathIndicators) return;
+                
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const particle = this.particles[i];
+                    
+                    // Get current position
+                    let x = parseFloat(particle.getAttribute("cx"));
+                    let y = parseFloat(particle.getAttribute("cy"));
+                    
+                    // Update position
+                    x += particle.vx;
+                    y += particle.vy;
+                    
+                    // Update attributes
+                    particle.setAttribute("cx", x);
+                    particle.setAttribute("cy", y);
+                    
+                    // Check if particle is out of bounds
+                    const distanceFromCenter = Math.sqrt(Math.pow(x - 80, 2) + Math.pow(y - 80, 2));
+                    
+                    if (this.phase === 'Inhale' && distanceFromCenter < 20) {
+                        // Particle reached center during inhale
+                        this.particles.splice(i, 1);
+                        particle.remove();
+                    } else if (this.phase === 'Exhale' && distanceFromCenter > 80) {
+                        // Particle reached edge during exhale
+                        this.particles.splice(i, 1);
+                        particle.remove();
+                    }
+                }
+            }
+            
+            clearParticles() {
+                // Remove all particles
+                for (const particle of this.particles) {
+                    particle.remove();
+                }
+                this.particles = [];
+            }
+            
+            setActive(active) {
+                this.active = active;
+                if (!active) {
+                    this.clearParticles();
+                    // Hide all arrows
+                    const arrows = this.svg.querySelectorAll('.breath-guide-arrow');
+                    arrows.forEach(arrow => {
+                        arrow.classList.remove('arrow-visible');
+                    });
+                }
+            }
+        }
+
+        const breathParticleSystem = new BreathParticleSystem(breathIndicatorSVG);
+
+        function applyBreathIndicatorSetting(enabled) {
+            appState.breathIndicators = enabled;
+            breathIndicatorSwitch.checked = enabled;
+            breathParticleSystem.setActive(enabled);
+        }
+
+        // --- Color Themes ---
+        function applyColorTheme(theme) {
+            let colors;
+            
+            if (theme === 'custom') {
+                colors = appState.customColors;
+                customColorsDiv.style.display = 'block';
+            } else {
+                colors = colorThemes[theme] || colorThemes.default;
+                customColorsDiv.style.display = 'none';
+            }
+            
+            // Apply colors to all techniques
+            for (const key in techniques) {
+                techniques[key].colorInhale = colors.inhale;
+                techniques[key].colorHold = colors.hold;
+                techniques[key].colorExhale = colors.exhale;
+            }
+            
+            // Update custom color inputs to match the selected theme
+            inhaleColorInput.value = colors.inhale;
+            holdColorInput.value = colors.hold;
+            exhaleColorInput.value = colors.exhale;
+            
+            // Update visualization immediately if animation is running
+            if (animationFrameId) {
+                // Force immediate color update by restarting animation
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                startTime = performance.now();
+                animationFrameId = requestAnimationFrame(animate);
+            }
+        }
+
+        // --- Session Statistics ---
+        function updateStatsDisplay() {
+            // Update summary stats
+            totalSessionsElement.textContent = appState.sessionStats.totalSessions;
+            totalMinutesElement.textContent = Math.round(appState.sessionStats.totalSeconds / 60);
+            currentStreakElement.textContent = appState.sessionStats.currentStreak;
+            
+            // Update session history
+            sessionHistoryElement.innerHTML = '';
+            
+            if (appState.sessionStats.sessions.length === 0) {
+                const noSessionsMsg = document.createElement('div');
+                noSessionsMsg.className = 'no-sessions';
+                noSessionsMsg.textContent = 'No previous sessions found.';
+                sessionHistoryElement.appendChild(noSessionsMsg);
+                return;
+            }
+            
+            // Sort sessions by date (newest first)
+            const sortedSessions = [...appState.sessionStats.sessions].sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+            
+            // Show at most 20 most recent sessions
+            const recentSessions = sortedSessions.slice(0, 20);
+            
+            recentSessions.forEach(session => {
+                const sessionEntry = document.createElement('div');
+                sessionEntry.className = 'session-entry';
+                
+                const dateObj = new Date(session.date);
+                const formattedDate = dateObj.toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+                const formattedTime = dateObj.toLocaleTimeString(undefined, {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const sessionDate = document.createElement('div');
+                sessionDate.className = 'session-date';
+                sessionDate.textContent = `${formattedDate}, ${formattedTime}`;
+                
+                const sessionTechnique = document.createElement('div');
+                sessionTechnique.className = 'session-technique';
+                sessionTechnique.textContent = session.technique;
+                
+                const sessionDuration = document.createElement('div');
+                sessionDuration.className = 'session-duration';
+                sessionDuration.textContent = `${Math.round(session.duration / 60)} min`;
+                
+                sessionEntry.appendChild(sessionDate);
+                sessionEntry.appendChild(sessionTechnique);
+                sessionEntry.appendChild(sessionDuration);
+                
+                sessionHistoryElement.appendChild(sessionEntry);
+            });
+        }
+
+        // Start recording a session
+        function startSession() {
+            sessionStartTime = Date.now();
+            sessionActive = true;
+            sessionTechnique = techniques[appState.technique].name;
+            console.log("Session started:", sessionTechnique);
+            
+            // If a timer is set, use that as the planned duration
+            sessionDuration = appState.timer;
+        }
+
+        // End and record a session
+        function endSession(completedFully = true) {
+            if (!sessionActive) return;
+            
+            const endTime = Date.now();
+            const actualDuration = Math.round((endTime - sessionStartTime) / 1000); // Duration in seconds
+            
+            // Only record sessions that last at least 10 seconds
+            if (actualDuration >= 10) {
+                // Create a session record
+                const session = {
+                    date: new Date().toISOString(),
+                    technique: sessionTechnique,
+                    duration: actualDuration,
+                    completedFully: completedFully
+                };
+                
+                // Update session stats
+                appState.sessionStats.totalSessions++;
+                appState.sessionStats.totalSeconds += actualDuration;
+                appState.sessionStats.sessions.push(session);
+                
+                // Update streak
+                const today = new Date().toDateString();
+                const lastSessionDate = appState.sessionStats.lastSessionDate ? 
+                    new Date(appState.sessionStats.lastSessionDate).toDateString() : null;
+                
+                if (lastSessionDate === today) {
+                    // Already logged a session today, streak doesn't change
+                } else if (lastSessionDate) {
+                    // Check if the last session was yesterday
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const yesterdayString = yesterday.toDateString();
+                    
+                    if (lastSessionDate === yesterdayString) {
+                        // Continue the streak
+                        appState.sessionStats.currentStreak++;
+                    } else {
+                        // Break in the streak, start over
+                        appState.sessionStats.currentStreak = 1;
+                    }
+                } else {
+                    // First session ever
+                    appState.sessionStats.currentStreak = 1;
+                }
+                
+                // Update the last session date
+                appState.sessionStats.lastSessionDate = new Date().toISOString();
+                
+                // Save the updated stats
+                saveState();
+                console.log("Session recorded:", session);
+            }
+            
+            // Reset session tracking variables
+            sessionActive = false;
+            sessionStartTime = 0;
+        }
+
+        // Clear all stats
+        function clearSessionStats() {
+            appState.sessionStats = { ...defaultSettings.sessionStats };
+            saveState();
+            updateStatsDisplay();
+        }
+
+        // --- Export/Import Settings ---
+        function createExportableSettings() {
+            // Create a copy of appState
+            const exportSettings = { ...appState };
+            
+            // Remove session stats and other sensitive/personal data
+            delete exportSettings.sessionStats;
+            
+            return exportSettings;
+        }
+
+        function exportSettings() {
+            try {
+                const settings = createExportableSettings();
+                const settingsJSON = JSON.stringify(settings, null, 2);
+                
+                // Create a data URL
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(settingsJSON);
+                
+                // Create temporary download link
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "breathing-app-settings.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                // Show success message
+                debugInfo.textContent = "Settings exported successfully!";
+            } catch (error) {
+                console.error("Export error:", error);
+                debugInfo.textContent = "Export failed. See console for details.";
+            }
+        }
+
+        function shareSettings() {
+            if (!navigator.share) {
+                // Fall back to export if Web Share API is not available
+                exportSettings();
+                return;
+            }
+            
+            try {
+                const settings = createExportableSettings();
+                const settingsJSON = JSON.stringify(settings, null, 2);
+                
+                const blob = new Blob([settingsJSON], { type: 'application/json' });
+                const file = new File([blob], 'breathing-app-settings.json', { type: 'application/json' });
+                
+                navigator.share({
+                    title: 'Breathing App Settings',
+                    text: 'My custom breathing app settings',
+                    files: [file]
+                }).then(() => {
+                    debugInfo.textContent = "Settings shared successfully!";
+                }).catch(error => {
+                    console.error("Share error:", error);
+                    // Fall back to export if sharing fails
+                    exportSettings();
+                });
+            } catch (error) {
+                console.error("Share preparation error:", error);
+                // Fall back to export
+                exportSettings();
+            }
+        }
+
+        function importSettings(settingsJSON) {
+            try {
+                // Parse the JSON
+                const importedSettings = JSON.parse(settingsJSON);
+                
+                // Validate the imported settings
+                const requiredKeys = ['technique', 'visualizer', 'soundType'];
+                const missingKeys = requiredKeys.filter(key => !(key in importedSettings));
+                
+                if (missingKeys.length > 0) {
+                    throw new Error(`Invalid settings: missing ${missingKeys.join(', ')}`);
+                }
+                
+                // Preserve session stats
+                const sessionStats = appState.sessionStats;
+                
+                // Apply the imported settings
+                for (const key in importedSettings) {
+                    appState[key] = importedSettings[key];
+                }
+                
+                // Restore session stats
+                appState.sessionStats = sessionStats;
+                
+                // Apply the new settings to the UI
+                applyStateToUI();
+                
+                // Save to localStorage
+                saveState();
+                
+                // Close the modal
+                importModal.classList.remove('visible');
+                
+                // Show success message
+                debugInfo.textContent = "Settings imported successfully!";
+                
+                // Reset animation
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                startTime = performance.now();
+                sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0;
+                previousPhase = '';
+                showNewPhrase = true;
+                updateTimerDisplay();
+                animationFrameId = requestAnimationFrame(animate);
+                
+                return true;
+            } catch (error) {
+                console.error("Import error:", error);
+                importError.textContent = `Error: ${error.message}`;
+                importError.classList.add('visible');
+                return false;
+            }
+        }
+
+        // --- Guided Sessions ---
+        function applyGuidedSessionPreset(presetKey) {
+            if (presetKey === 'none') return; // Using custom settings
+            
+            const preset = guidedSessionPresets[presetKey];
+            if (!preset) return;
+            
+            // First stop any current session
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            stopSound();
+            stopVibration();
+            stopTTS();
+            
+            // Apply all preset settings
+            for (const key in preset) {
+                if (key !== 'name' && key !== 'description') {
+                    appState[key] = preset[key];
+                }
+            }
+            
+            // Update UI to reflect new settings
+            applyStateToUI();
+            
+            // Display confirmation message
+            debugInfo.textContent = `Preset applied: ${preset.name}`;
+            
+            // Show the description briefly
+            techniqueDescription.textContent = preset.description;
+            setTimeout(() => {
+                updateTechniqueDetails(); // Restore normal technique description after 5 seconds
+            }, 5000);
+            
+            // Save state
+            saveState();
+            
+            // Restart animation
+            startTime = performance.now();
+            sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0;
+            previousPhase = '';
+            showNewPhrase = true;
+            updateTimerDisplay();
+            animationFrameId = requestAnimationFrame(animate);
+            
+            // Start sound if appropriate
+            if (appState.soundType !== 'none') {
+                Tone.start().then(() => {
+                    toneStarted = true;
+                    initializeSound();
+                    startSound();
+                }).catch(e => {
+                    console.error("Tone.start() failed:", e);
+                });
+            }
+            
+            // Close menu panel
+            bodyElement.classList.remove('menu-open');
+        }
 
         // --- Update Functions ---
-        function updateTechniqueDetails() { const techniqueKey = appState.technique; const description = techniques[techniqueKey]?.description || ''; techniqueDescription.textContent = description; if (techniqueKey === 'custom') { customTimingInputsDiv.classList.add('visible'); } else { customTimingInputsDiv.classList.remove('visible'); } }
-        function updateVolume() { if (synth) { synth.volume.rampTo(appState.volume, 0.1); } }
-        function updatePanning() { if (panner) { panner.pan.rampTo(appState.panning, 0.1); } }
-        function updateVisualizer() { if (appState.visualizer === 'circle') { animatedCircle.classList.remove('hidden'); animatedBarContainer.classList.remove('visible'); } else { animatedCircle.classList.add('hidden'); animatedBarContainer.classList.add('visible'); } }
-        function updateTimerDisplay() { clearInterval(timerIntervalId); timerDisplay.textContent = ''; if (sessionEndTime > 0) { timerIntervalId = setInterval(() => { const now = performance.now(); const remainingMs = Math.max(0, sessionEndTime - now); const remainingSeconds = Math.round(remainingMs / 1000); const minutes = Math.floor(remainingSeconds / 60); const seconds = remainingSeconds % 60; timerDisplay.textContent = `Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`; if (remainingMs <= 0 && !isFadingOut) { clearInterval(timerIntervalId); timerDisplay.textContent = "Session Complete!"; } }, 1000); } }
+        function updateTechniqueDetails() { 
+            const techniqueKey = appState.technique; 
+            const description = techniques[techniqueKey]?.description || ''; 
+            techniqueDescription.textContent = description; 
+            if (techniqueKey === 'custom') { 
+                customTimingInputsDiv.classList.add('visible'); 
+            } else { 
+                customTimingInputsDiv.classList.remove('visible'); 
+            } 
+        }
+        
+        function updateVolume() { 
+            if (synth) { 
+                synth.volume.rampTo(appState.volume, 0.1); 
+            }
+            if (player) {
+                player.volume.rampTo(appState.volume, 0.1);
+            }
+        }
+        
+        function updatePanning() { 
+            if (panner) { 
+                panner.pan.rampTo(appState.panning, 0.1); 
+            } 
+        }
+        
+        function updateVisualizer() { 
+            if (appState.visualizer === 'circle') { 
+                animatedCircle.classList.remove('hidden'); 
+                animatedBarContainer.classList.remove('visible'); 
+            } else { 
+                animatedCircle.classList.add('hidden'); 
+                animatedBarContainer.classList.add('visible'); 
+            } 
+        }
+        
+        function updateTimerDisplay() { 
+            clearInterval(timerIntervalId); 
+            timerDisplay.textContent = ''; 
+            if (sessionEndTime > 0) { 
+                timerIntervalId = setInterval(() => { 
+                    const now = performance.now(); 
+                    const remainingMs = Math.max(0, sessionEndTime - now); 
+                    const remainingSeconds = Math.round(remainingMs / 1000); 
+                    const minutes = Math.floor(remainingSeconds / 60); 
+                    const seconds = remainingSeconds % 60; 
+                    timerDisplay.textContent = `Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`; 
+                    if (remainingMs <= 0 && !isFadingOut) { 
+                        clearInterval(timerIntervalId); 
+                        timerDisplay.textContent = "Session Complete!";
+                        } 
+                }, 1000); 
+            } 
+        }
+        
         function updatePhraseList() {
              const category = appState.phraseCategory;
              if (category === 'custom') {
@@ -487,6 +1936,9 @@
         function animate(currentTime) {
             // --- Session Timer Check & Fade Out ---
              if (sessionEndTime > 0 && currentTime >= sessionEndTime && !isFadingOut) {
+                 // End the session for stats tracking
+                 endSession(true); // Session completed fully
+                 
                  isFadingOut = true;
                  console.log("Starting fade out...");
                  const fadeStartTime = currentTime;
@@ -552,144 +2004,574 @@
                 if (phaseProgress > 0.9) { showNewPhrase = true; }
             }
 
+            // --- Breath Indicators ---
+            breathParticleSystem.setPhase(phase);
+            // Periodically create new particles
+            if (Math.random() < 0.2) { // Adjust frequency as needed
+                breathParticleSystem.createParticle();
+            }
+            // Update existing particles
+            breathParticleSystem.updateParticles();
+
             // --- Trigger Vibration & TTS on Phase Change ---
             if (phase !== previousPhase) {
-                switch (phase) { case 'Inhale': triggerVibration(vibrateInhale); speakPhase('Inhale'); break; case 'Hold': triggerVibration(vibrateHold); speakPhase('Hold'); break; case 'Exhale': triggerVibration(vibrateExhale); speakPhase('Exhale'); break; }
+                switch (phase) { 
+                    case 'Inhale': 
+                        triggerVibration(vibrateInhale); 
+                        speakPhase('Inhale'); 
+                        break; 
+                    case 'Hold': 
+                        triggerVibration(vibrateHold); 
+                        speakPhase('Hold'); 
+                        break; 
+                    case 'Exhale': 
+                        triggerVibration(vibrateExhale); 
+                        speakPhase('Exhale'); 
+                        break; 
+                }
                 previousPhase = phase;
             }
 
             // Apply visual styles
-             if (appState.visualizer === 'circle') { animatedCircle.style.transform = `scale(${scale})`; animatedCircle.style.opacity = opacity; animatedCircle.style.setProperty('--center-color', centerColor); }
-             else { animatedBar.style.height = `${barHeight}%`; }
+             if (appState.visualizer === 'circle') { 
+                animatedCircle.style.transform = `scale(${scale})`; 
+                animatedCircle.style.opacity = opacity; 
+                animatedCircle.style.setProperty('--center-color', centerColor); 
+             }
+             else { 
+                animatedBar.style.height = `${barHeight}%`; 
+             }
             breathText.textContent = text;
 
             // Sound Logic
-            if (appState.soundEnabled && synth && synth.state === 'started') {
-                if (synth.filterEnvelope && synth.filterEnvelope.baseFrequency && synth.filterEnvelope.filter.Q) {
-                     synth.filterEnvelope.baseFrequency.rampTo(targetFilterFreq, 0.3);
-                     synth.filterEnvelope.filter.Q.rampTo(targetQ, 0.2); // Ramp Q value
-                 } else { console.warn("Filter envelope/Q not available."); }
+            if (appState.soundEnabled) {
+                if (synth && synth.state === 'started') {
+                    if (synth.filterEnvelope && synth.filterEnvelope.baseFrequency && synth.filterEnvelope.filter.Q) {
+                         synth.filterEnvelope.baseFrequency.rampTo(targetFilterFreq, 0.3);
+                         synth.filterEnvelope.filter.Q.rampTo(targetQ, 0.2); // Ramp Q value
+                     } else { 
+                        console.warn("Filter envelope/Q not available."); 
+                     }
+                } else if (player && player.state === 'started' && filter) {
+                    // Modulate the filter for natural sounds too
+                    filter.frequency.rampTo(targetFilterFreq, 0.3);
+                    filter.Q.rampTo(targetQ, 0.2);
+                }
             }
+            
             // Debug Info
-            const cyclePercent = (elapsedTime / totalDuration) * 100; debugInfo.textContent = `Stage: ${phase} | Cycle: ${cyclePercent.toFixed(1)}%`;
+            const cyclePercent = (elapsedTime / totalDuration) * 100; 
+            debugInfo.textContent = `Stage: ${phase} | Cycle: ${cyclePercent.toFixed(1)}%`;
+            
             // Loop
             animationFrameId = requestAnimationFrame(animate);
         }
 
         // --- Event Listeners ---
-        menuToggle.addEventListener('click', () => { bodyElement.classList.toggle('menu-open'); });
-        document.addEventListener('click', (event) => { if (bodyElement.classList.contains('menu-open') && !menuPanel.contains(event.target) && !menuToggle.contains(event.target)) { bodyElement.classList.remove('menu-open'); } });
-        infoButton.addEventListener('click', () => { infoModal.style.display = 'flex'; }); // Show modal
-        modalCloseButton.addEventListener('click', () => { infoModal.style.display = 'none'; }); // Hide modal
-        infoModal.addEventListener('click', (event) => { if (event.target === infoModal) { infoModal.style.display = 'none'; } }); // Hide modal on backdrop click
+        menuToggle.addEventListener('click', () => { 
+            bodyElement.classList.toggle('menu-open'); 
+        });
+        
+        document.addEventListener('click', (event) => { 
+            if (bodyElement.classList.contains('menu-open') && !menuPanel.contains(event.target) && !menuToggle.contains(event.target)) { 
+                bodyElement.classList.remove('menu-open'); 
+            } 
+        });
+        
+        infoButton.addEventListener('click', () => { 
+            infoModal.classList.add('visible');
+        }); 
+        
+        modalCloseButton.addEventListener('click', () => { 
+            infoModal.classList.remove('visible');
+        }); 
+        
+        infoModal.addEventListener('click', (event) => { 
+            if (event.target === infoModal) { 
+                infoModal.classList.remove('visible'); 
+            } 
+        });
 
-        techniqueSelect.addEventListener('change', (event) => { if (animationFrameId) cancelAnimationFrame(animationFrameId); stopSound(); stopVibration(); stopTTS(); appState.technique = event.target.value; updateTechniqueDetails(); startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; updateTimerDisplay(); previousPhase = ''; showNewPhrase = true; calmPhraseElement.classList.remove('visible'); calmPhraseElement.textContent = ''; saveState(); bodyElement.classList.remove('menu-open'); animationFrameId = requestAnimationFrame(animate); });
-        soundTypeSelect.addEventListener('change', (event) => { appState.soundType = event.target.value; const wasEnabled = appState.soundEnabled; stopSound(); initializeSound(appState.soundType); if(wasEnabled && appState.soundType !== 'none') { startSound(); } saveState(); });
-        visualizerSelect.addEventListener('change', (event) => { appState.visualizer = event.target.value; updateVisualizer(); saveState(); });
-        timerSelect.addEventListener('change', (event) => { appState.timer = parseInt(event.target.value, 10); startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; updateTimerDisplay(); saveState(); if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(animate); });
-        [customInhaleInput, customHoldInput, customExhaleInput].forEach(input => { input.addEventListener('change', () => { let needsRestart = false; if (appState.technique === 'custom') { needsRestart = true; } appState.customInhale = Math.max(0.1, parseFloat(customInhaleInput.value) || defaultSettings.customInhale); appState.customHold = Math.max(0, parseFloat(customHoldInput.value) || defaultSettings.customHold); appState.customExhale = Math.max(0.1, parseFloat(customExhaleInput.value) || defaultSettings.customExhale); customInhaleInput.value = appState.customInhale; customHoldInput.value = appState.customHold; customExhaleInput.value = appState.customExhale; saveState(); if (needsRestart) { startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; previousPhase = ''; if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(animate); } console.log("Custom timings updated:", appState); } }); });
-        soundToggleButton.addEventListener('click', async () => { if (!toneStarted) { try { await Tone.start(); initializeSound(); toneStarted = true; console.log("AudioContext started."); } catch (e) { console.error("Tone.start() failed:", e); soundToggleButton.textContent = 'Sound Error'; soundToggleButton.disabled = true; return; } } if (!synth && appState.soundType !== 'none') { console.error("Synth not initialized."); if (toneStarted) initializeSound(); if (!synth) return; } if (!appState.soundEnabled) { startSound(); } else { stopSound(); } saveState(); });
-        volumeSlider.addEventListener('input', (event) => { appState.volume = parseFloat(event.target.value); updateVolume(); saveState(); console.log("Volume set to:", appState.volume); });
-        panningSlider.addEventListener('input', (event) => { appState.panning = parseFloat(event.target.value); updatePanning(); saveState(); });
-        qModSwitch.addEventListener('change', () => { appState.qMod = qModSwitch.checked; saveState(); });
-        function applyTheme(theme) { if (theme === 'dark') { bodyElement.classList.add('dark-mode'); darkModeSwitch.checked = true; } else { bodyElement.classList.remove('dark-mode'); darkModeSwitch.checked = false; } appState.theme = theme; }
-        darkModeSwitch.addEventListener('change', () => { const selectedTheme = darkModeSwitch.checked ? 'dark' : 'light'; applyTheme(selectedTheme); saveState(); });
-        function applyVibrationSetting(enabled) { appState.vibration = enabled; vibrationSwitch.checked = enabled; if (!enabled && vibrationApiSupported) { navigator.vibrate(0); } console.log("Vibration Enabled:", appState.vibration); }
-        vibrationSwitch.addEventListener('change', () => { const isEnabled = vibrationSwitch.checked; applyVibrationSetting(isEnabled); saveState(); if (isEnabled) { triggerVibration([50]); } });
-        if (!vibrationApiSupported) { const vibrationToggleGroup = vibrationSwitch.closest('.toggle-switch-group'); if (vibrationToggleGroup) { vibrationToggleGroup.style.opacity = '0.5'; vibrationToggleGroup.style.pointerEvents = 'none'; const label = vibrationToggleGroup.querySelector('label'); if(label) label.title = "Vibration not supported."; } console.warn("Vibration API not supported."); }
-        function applyTTSSettings(enabled) { appState.tts = enabled; ttsSwitch.checked = enabled; if (!enabled) { stopTTS(); } console.log("TTS Enabled:", appState.tts); }
-        ttsSwitch.addEventListener('change', () => { const isEnabled = ttsSwitch.checked; applyTTSSettings(isEnabled); saveState(); if (isEnabled) { speakPhase(previousPhase || 'Ready'); } }); // Speak current phase on enable
-        if (!ttsApiSupported) { const ttsToggleGroup = ttsSwitch.closest('.toggle-switch-group'); if (ttsToggleGroup) { ttsToggleGroup.style.opacity = '0.5'; ttsToggleGroup.style.pointerEvents = 'none'; const label = ttsToggleGroup.querySelector('label'); if(label) label.title = "TTS not supported."; } console.warn("TTS API not supported."); }
-        async function applyWakeLockSetting(enabled) { appState.wakeLock = enabled; wakeLockSwitch.checked = enabled; if (enabled) { await requestWakeLock(); } else { await releaseWakeLock(); } console.log("Keep Screen Awake:", appState.wakeLock); }
-        wakeLockSwitch.addEventListener('change', async () => { const isEnabled = wakeLockSwitch.checked; await applyWakeLockSetting(isEnabled); saveState(); });
-        if (!wakeLockApiSupported) { const wakeLockToggleGroup = wakeLockSwitch.closest('.toggle-switch-group'); if (wakeLockToggleGroup) { wakeLockToggleGroup.style.opacity = '0.5'; wakeLockToggleGroup.style.pointerEvents = 'none'; const label = wakeLockToggleGroup.querySelector('label'); if(label) label.title = "Screen Wake Lock not supported."; } console.warn("Screen Wake Lock API not supported."); }
-        phraseCategorySelect.addEventListener('change', () => { appState.phraseCategory = phraseCategorySelect.value; updatePhraseList(); saveState(); });
-        customPhrasesTextarea.addEventListener('input', () => { appState.customPhrases = customPhrasesTextarea.value; if (appState.phraseCategory === 'custom') { updatePhraseList(); } saveState(); }); // Update list live if custom selected
+        techniqueSelect.addEventListener('change', (event) => { 
+            if (animationFrameId) cancelAnimationFrame(animationFrameId); 
+            stopSound(); 
+            stopVibration(); 
+            stopTTS(); 
+            appState.technique = event.target.value; 
+            updateTechniqueDetails(); 
+            startTime = performance.now(); 
+            
+            // If there was an active session, end it
+            if (sessionActive) {
+                endSession(false); // Session ended by switching technique
+            }
+            
+            sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; 
+            updateTimerDisplay(); 
+            previousPhase = ''; 
+            showNewPhrase = true; 
+            calmPhraseElement.classList.remove('visible'); 
+            calmPhraseElement.textContent = ''; 
+            saveState(); 
+            bodyElement.classList.remove('menu-open'); 
+            animationFrameId = requestAnimationFrame(animate);
+            
+            // Start a new session
+            startSession();
+        });
+        
+        soundTypeSelect.addEventListener('change', (event) => { 
+            appState.soundType = event.target.value; 
+            const wasEnabled = appState.soundEnabled; 
+            stopSound(); 
+            initializeSound(appState.soundType); 
+            if(wasEnabled && appState.soundType !== 'none') { 
+                startSound(); 
+            } 
+            saveState(); 
+        });
+        
+        visualizerSelect.addEventListener('change', (event) => { 
+            appState.visualizer = event.target.value; 
+            updateVisualizer(); 
+            saveState(); 
+        });
+        
+        timerSelect.addEventListener('change', (event) => { 
+            appState.timer = parseInt(event.target.value, 10); 
+            startTime = performance.now(); 
+            sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; 
+            updateTimerDisplay(); 
+            saveState(); 
+            if (animationFrameId) cancelAnimationFrame(animationFrameId); 
+            animationFrameId = requestAnimationFrame(animate); 
+        });
+        
+        [customInhaleInput, customHoldInput, customExhaleInput].forEach(input => { 
+            input.addEventListener('change', () => { 
+                let needsRestart = false; 
+                if (appState.technique === 'custom') { 
+                    needsRestart = true; 
+                } 
+                appState.customInhale = Math.max(0.1, parseFloat(customInhaleInput.value) || defaultSettings.customInhale); 
+                appState.customHold = Math.max(0, parseFloat(customHoldInput.value) || defaultSettings.customHold); 
+                appState.customExhale = Math.max(0.1, parseFloat(customExhaleInput.value) || defaultSettings.customExhale); 
+                customInhaleInput.value = appState.customInhale; 
+                customHoldInput.value = appState.customHold; 
+                customExhaleInput.value = appState.customExhale; 
+                saveState(); 
+                if (needsRestart) { 
+                    startTime = performance.now(); 
+                    sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; 
+                    previousPhase = ''; 
+                    if (animationFrameId) { 
+                        cancelAnimationFrame(animationFrameId); 
+                        animationFrameId = requestAnimationFrame(animate); 
+                    } 
+                    console.log("Custom timings updated:", appState); 
+                } 
+            }); 
+        });
+        
+        soundToggleButton.addEventListener('click', async () => { 
+            if (!toneStarted) { 
+                try { 
+                    await Tone.start(); 
+                    initializeSound(); 
+                    toneStarted = true; 
+                    console.log("AudioContext started."); 
+                } catch (e) { 
+                    console.error("Tone.start() failed:", e); 
+                    soundToggleButton.textContent = 'Sound Error'; 
+                    soundToggleButton.disabled = true; 
+                    return; 
+                } 
+            } 
+            
+            if (!synth && !player && appState.soundType !== 'none') { 
+                console.error("Sound source not initialized."); 
+                if (toneStarted) initializeSound(); 
+                if (!synth && !player) return; 
+            } 
+            
+            if (!appState.soundEnabled) { 
+                startSound(); 
+            } else { 
+                stopSound(); 
+                
+                // If turning sound off and no timer is set, consider this ending a session
+                if (sessionActive && appState.timer === 0) {
+                    endSession(false); // Session ended manually
+                }
+            } 
+            
+            saveState(); 
+        });
+        
+        volumeSlider.addEventListener('input', (event) => { 
+            appState.volume = parseFloat(event.target.value); 
+            updateVolume(); 
+            saveState(); 
+            console.log("Volume set to:", appState.volume); 
+        });
+        
+        panningSlider.addEventListener('input', (event) => { 
+            appState.panning = parseFloat(event.target.value); 
+            updatePanning(); 
+            saveState(); 
+        });
+        
+        qModSwitch.addEventListener('change', () => { 
+            appState.qMod = qModSwitch.checked; 
+            saveState(); 
+        });
+        
+        function applyTheme(theme) { 
+            if (theme === 'dark') { 
+                bodyElement.classList.add('dark-mode'); 
+                darkModeSwitch.checked = true; 
+            } else { 
+                bodyElement.classList.remove('dark-mode'); 
+                darkModeSwitch.checked = false; 
+            } 
+            appState.theme = theme; 
+        }
+        
+        darkModeSwitch.addEventListener('change', () => { 
+            const selectedTheme = darkModeSwitch.checked ? 'dark' : 'light'; 
+            applyTheme(selectedTheme); 
+            saveState(); 
+        });
+        
+        function applyVibrationSetting(enabled) { 
+            appState.vibration = enabled; 
+            vibrationSwitch.checked = enabled; 
+            if (!enabled && vibrationApiSupported) { 
+                navigator.vibrate(0); 
+            } 
+            console.log("Vibration Enabled:", appState.vibration); 
+        }
+        
+        vibrationSwitch.addEventListener('change', () => { 
+            const isEnabled = vibrationSwitch.checked; 
+            applyVibrationSetting(isEnabled); 
+            saveState(); 
+            if (isEnabled) { 
+                triggerVibration([50]); 
+            } 
+        });
+        
+        if (!vibrationApiSupported) { 
+            const vibrationToggleGroup = vibrationSwitch.closest('.toggle-switch-group'); 
+            if (vibrationToggleGroup) { 
+                vibrationToggleGroup.style.opacity = '0.5'; 
+                vibrationToggleGroup.style.pointerEvents = 'none'; 
+                const label = vibrationToggleGroup.querySelector('label'); 
+                if(label) label.title = "Vibration not supported."; 
+            } 
+            console.warn("Vibration API not supported."); 
+        }
+        
+        function applyTTSSettings(enabled) { 
+            appState.tts = enabled; 
+            ttsSwitch.checked = enabled; 
+            if (!enabled) { 
+                stopTTS(); 
+            } 
+            console.log("TTS Enabled:", appState.tts); 
+        }
+        
+        ttsSwitch.addEventListener('change', () => { 
+            const isEnabled = ttsSwitch.checked; 
+            applyTTSSettings(isEnabled); 
+            saveState(); 
+            if (isEnabled) { 
+                speakPhase(previousPhase || 'Ready'); 
+            } 
+        }); 
+        
+        if (!ttsApiSupported) { 
+            const ttsToggleGroup = ttsSwitch.closest('.toggle-switch-group'); 
+            if (ttsToggleGroup) { 
+                ttsToggleGroup.style.opacity = '0.5'; 
+                ttsToggleGroup.style.pointerEvents = 'none'; 
+                const label = ttsToggleGroup.querySelector('label'); 
+                if(label) label.title = "TTS not supported."; 
+            } 
+            console.warn("TTS API not supported."); 
+        }
+        
+        async function applyWakeLockSetting(enabled) { 
+            appState.wakeLock = enabled; 
+            wakeLockSwitch.checked = enabled; 
+            if (enabled) { 
+                await requestWakeLock(); 
+            } else { 
+                await releaseWakeLock(); 
+            } 
+            console.log("Keep Screen Awake:", appState.wakeLock); 
+        }
+        
+        wakeLockSwitch.addEventListener('change', async () => { 
+            const isEnabled = wakeLockSwitch.checked; 
+            await applyWakeLockSetting(isEnabled); 
+            saveState(); 
+        });
+        
+        if (!wakeLockApiSupported) { 
+            const wakeLockToggleGroup = wakeLockSwitch.closest('.toggle-switch-group'); 
+            if (wakeLockToggleGroup) { 
+                wakeLockToggleGroup.style.opacity = '0.5'; 
+                wakeLockToggleGroup.style.pointerEvents = 'none'; 
+                const label = wakeLockToggleGroup.querySelector('label'); 
+                if(label) label.title = "Screen Wake Lock not supported."; 
+            } 
+            console.warn("Screen Wake Lock API not supported."); 
+        }
+        
+        phraseCategorySelect.addEventListener('change', () => { 
+            appState.phraseCategory = phraseCategorySelect.value; 
+            updatePhraseList(); 
+            saveState(); 
+        });
+        
+        customPhrasesTextarea.addEventListener('input', () => { 
+            appState.customPhrases = customPhrasesTextarea.value; 
+            if (appState.phraseCategory === 'custom') { 
+                updatePhraseList(); 
+            } 
+            saveState(); 
+        });
+        
         resetButton.addEventListener('click', resetToDefaults);
+
+        // --- New Feature Event Listeners ---
+        
+        // Color Theme
+        colorThemeSelect.addEventListener('change', () => {
+            appState.colorTheme = colorThemeSelect.value;
+            applyColorTheme(appState.colorTheme);
+            saveState();
+        });
+
+        [inhaleColorInput, holdColorInput, exhaleColorInput].forEach(input => {
+            input.addEventListener('change', () => {
+                appState.customColors = {
+                    inhale: inhaleColorInput.value,
+                    hold: holdColorInput.value,
+                    exhale: exhaleColorInput.value
+                };
+                
+                if (appState.colorTheme === 'custom') {
+                    applyColorTheme('custom');
+                } else {
+                    // If they change a color while not in custom mode, switch to custom mode
+                    appState.colorTheme = 'custom';
+                    colorThemeSelect.value = 'custom';
+                    applyColorTheme('custom');
+                }
+                
+                saveState();
+            });
+        });
+
+        // Fullscreen
+        fullscreenSwitch.addEventListener('change', () => {
+            appState.fullscreen = fullscreenSwitch.checked;
+            applyFullscreenSetting(appState.fullscreen);
+            saveState();
+        });
+
+        // Breath Indicators
+        breathIndicatorSwitch.addEventListener('change', () => {
+            applyBreathIndicatorSetting(breathIndicatorSwitch.checked);
+            saveState();
+        });
+
+        // Stats
+        statsButton.addEventListener('click', () => {
+            updateStatsDisplay();
+            statsModal.classList.add('visible');
+        });
+
+        statsModalClose.addEventListener('click', () => {
+            statsModal.classList.remove('visible');
+        });
+
+        statsModal.addEventListener('click', (event) => {
+            if (event.target === statsModal) {
+                statsModal.classList.remove('visible');
+            }
+        });
+
+        clearStatsButton.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all session statistics?')) {
+                clearSessionStats();
+            }
+        });
+
+        // Export/Import
+        exportButton.addEventListener('click', () => {
+            // Try sharing first, will fall back to export if not supported
+            shareSettings();
+        });
+
+        importButton.addEventListener('click', () => {
+            // Reset the textarea and error message
+            importSettingsTextarea.value = '';
+            importError.textContent = '';
+            importError.classList.remove('visible');
+            
+            // Show the modal
+            importModal.classList.add('visible');
+        });
+
+        importModalClose.addEventListener('click', () => {
+            importModal.classList.remove('visible');
+        });
+
+        importModal.addEventListener('click', (event) => {
+            if (event.target === importModal) {
+                importModal.classList.remove('visible');
+            }
+        });
+
+        confirmImportButton.addEventListener('click', () => {
+            const settingsJSON = importSettingsTextarea.value.trim();
+            
+            if (!settingsJSON) {
+                importError.textContent = 'Please paste your settings first.';
+                importError.classList.add('visible');
+                return;
+            }
+            
+            importSettings(settingsJSON);
+        });
+
+        // Guided Sessions
+        guidedSessionSelect.addEventListener('change', () => {
+            const presetKey = guidedSessionSelect.value;
+            applyGuidedSessionPreset(presetKey);
+            
+            // Reset the select to "none" for next time
+            setTimeout(() => {
+                guidedSessionSelect.value = 'none';
+            }, 1000);
+        });
+
+        // Drag and drop for import settings
+        document.body.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.body.classList.add('drag-over');
+        });
+
+        document.body.addEventListener('dragleave', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.body.classList.remove('drag-over');
+        });
+
+        document.body.addEventListener('drop', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            document.body.classList.remove('drag-over');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const file = files[0];
+                
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = (e) => {
+                        const settingsJSON = e.target.result;
+                        if (importSettings(settingsJSON)) {
+                            debugInfo.textContent = "Settings imported successfully!";
+                        } else {
+                            debugInfo.textContent = "Import failed. Check console for details.";
+                        }
+                    };
+                    
+                    reader.readAsText(file);
+                } else {
+                    debugInfo.textContent = "Please drop a JSON settings file.";
+                }
+            }
+        });
 
         // --- Initialization ---
         loadState(); // Load saved settings or defaults FIRST
         populateOptions(); // Populate dropdowns
+        breathParticleSystem.initialize(); // Initialize breath indicators
         applyStateToUI(); // Apply loaded state to UI elements
         initializeSound(); // Initialize synth based on loaded state
         startTime = performance.now(); // Set initial start time
         sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; // Set initial session end time
         updateTimerDisplay(); // Start timer display if needed
         animationFrameId = requestAnimationFrame(animate); // Start the animation loop
+        
+        // PWA Install Button
+        const installButton = document.createElement('button');
+        installButton.style.display = 'none';
+        installButton.textContent = 'Install App';
+        installButton.classList.add('control-button');
+        installButton.style.position = 'fixed';
+        installButton.style.bottom = '20px';
+        installButton.style.left = '50%';
+        installButton.style.transform = 'translateX(-50%)';
+        installButton.style.zIndex = '1000';
+        installButton.style.padding = '12px 20px';
+        installButton.style.backgroundColor = 'var(--info-button-bg)';
+        document.body.appendChild(installButton);
 
-        // --- Fullscreen Feature ---
-        const fullscreenSwitch = document.getElementById('fullscreen-switch');
-        let fullscreenIndicator = null;
-        
-        function createFullscreenIndicator() {
-            if (fullscreenIndicator) return;
-            fullscreenIndicator = document.createElement('div');
-            fullscreenIndicator.className = 'fullscreen-indicator';
-            fullscreenIndicator.title = 'Exit Fullscreen (or press Esc)';
-            fullscreenIndicator.addEventListener('click', toggleFullscreen);
-            document.body.appendChild(fullscreenIndicator);
-        }
-        
-        function removeFullscreenIndicator() {
-            if (fullscreenIndicator) {
-                fullscreenIndicator.remove();
-                fullscreenIndicator = null;
-            }
-        }
-        
-        async function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                try {
-                    await document.documentElement.requestFullscreen();
-                    createFullscreenIndicator();
-                    if (fullscreenSwitch) fullscreenSwitch.checked = true;
-                    bodyElement.classList.remove('menu-open'); // Close menu when entering fullscreen
-                } catch (e) {
-                    console.error('Fullscreen request failed:', e);
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                    removeFullscreenIndicator();
-                    if (fullscreenSwitch) fullscreenSwitch.checked = false;
-                }
-            }
-        }
-        
-        document.addEventListener('fullscreenchange', () => {
-            if (!document.fullscreenElement) {
-                removeFullscreenIndicator();
-                if (fullscreenSwitch) fullscreenSwitch.checked = false;
-            } else {
-                createFullscreenIndicator();
-                if (fullscreenSwitch) fullscreenSwitch.checked = true;
-            }
-        });
-        
-        fullscreenSwitch.addEventListener('change', toggleFullscreen);
-        
-        // Add fullscreen state to settings
-        appState.fullscreen = false;
-        defaultSettings.fullscreen = false;
-        
-        // Add to applyStateToUI
-        function applyFullscreenSetting(enabled) {
-            if (enabled && !document.fullscreenElement) {
-                toggleFullscreen();
-            } else if (!enabled && document.fullscreenElement) {
-                toggleFullscreen();
-            }
-        }
-        
-        // Update applyStateToUI function to include
-        // applyFullscreenSetting(appState.fullscreen);
-        
-        // Add to settings
-        fullscreenSwitch.addEventListener('change', () => {
-            appState.fullscreen = fullscreenSwitch.checked;
-            saveState();
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show the install button
+            installButton.style.display = 'block';
         });
 
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response to install prompt: ${outcome}`);
+            
+            // Clear the saved prompt since it can't be used again
+            deferredPrompt = null;
+            
+            // Hide the install button
+            installButton.style.display = 'none';
+        });
+
+        // Hide button when app is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('App was installed');
+            installButton.style.display = 'none';
+        });
+
+        // Register service worker for PWA support
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('ServiceWorker registration failed: ', error);
+                    });
+            });
+        }
+
+        // Start a session when app loads
+        startSession();
     </script>
 </body>
 </html>
