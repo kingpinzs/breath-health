@@ -26,40 +26,51 @@
             --button-hover-bg: #5cae5c;
             --button-off-bg: #d97571;
             --button-off-hover-bg: #c9605c;
+            --reset-button-bg: #f0ad4e; /* Orange */
+            --reset-button-hover-bg: #ec971f;
             --switch-checked-bg: #A5CFF0;
+            --input-border: #ccc;
+            --input-bg: white;
+            --description-color: #667;
+            --bar-color: #A5CFF0; /* Color for the bar visualizer */
         }
 
         body.dark-mode {
-            --bg-color: #2C3E50; /* Dark Blue-Gray */
-            --text-color: #BDC3C7; /* Light Gray */
-            --panel-bg: rgba(52, 73, 94, 0.97); /* Darker Blue-Gray */
+            --bg-color: #2C3E50;
+            --text-color: #BDC3C7;
+            --panel-bg: rgba(52, 73, 94, 0.97);
             --panel-shadow: -2px 0 10px rgba(0,0,0,0.4);
-            --control-label-color: #ECF0F1; /* Very Light Gray */
+            --control-label-color: #ECF0F1;
             --debug-bg: rgba(44, 62, 80, 0.8);
             --debug-text: #BDC3C7;
-            --menu-toggle-bg: rgba(93, 109, 126, 0.7); /* Darker Gray */
+            --menu-toggle-bg: rgba(93, 109, 126, 0.7);
             --menu-toggle-hover: rgba(93, 109, 126, 0.9);
-            --menu-toggle-open-bg: rgba(231, 76, 60, 0.8); /* Darker Red */
+            --menu-toggle-open-bg: rgba(231, 76, 60, 0.8);
             --menu-icon-color: #ECF0F1;
-            --circle-gradient-edge: #34495E; /* Darker edge for gradient */
+            --circle-gradient-edge: #34495E;
             --slider-track: #566573;
-            --slider-thumb: #A5CFF0; /* Use light blue for thumb */
-            --button-bg: #5cae5c; /* Slightly different green */
+            --slider-thumb: #A5CFF0;
+            --button-bg: #5cae5c;
             --button-hover-bg: #4cae4c;
-            --button-off-bg: #c9605c; /* Slightly different red */
+            --button-off-bg: #c9605c;
             --button-off-hover-bg: #b9504c;
-            --switch-checked-bg: #5dade2; /* Slightly different blue */
+            --reset-button-bg: #d9534f; /* Use red for reset in dark mode */
+            --reset-button-hover-bg: #c9302c;
+            --switch-checked-bg: #5dade2;
+            --input-border: #566573;
+            --input-bg: #34495E;
+            --description-color: #95a5a6; /* Lighter gray */
+            --bar-color: #5dade2;
         }
         /* --- End Theme Variables --- */
 
-        /* Basic styling for the page */
         body {
             display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px;
             background-color: var(--bg-color); font-family: sans-serif; box-sizing: border-box; color: var(--text-color); position: relative; overflow-x: hidden;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* --- Unique Menu System --- */
+        /* --- Menu System --- */
         #menu-toggle {
             position: fixed; top: 20px; right: 20px; width: 40px; height: 40px; background-color: var(--menu-toggle-bg); border-radius: 50%; cursor: pointer; z-index: 1001; display: flex; justify-content: center; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); transition: background-color 0.3s ease, transform 0.3s ease;
         }
@@ -76,38 +87,57 @@
         body.menu-open #menu-panel { transform: translateX(0); opacity: 1; visibility: visible; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease, visibility 0s linear 0s, background-color 0.3s ease; }
 
         /* Controls inside the menu panel */
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 20px; /* Slightly reduced gap */ width: 100%; }
-        .control-group { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; }
-        .controls label { font-size: 1rem; color: var(--control-label-color); font-weight: 500; transition: color 0.3s ease; }
-        .controls select { padding: 10px 15px; border: 1px solid #ccc; border-radius: 5px; background-color: white; color: #333; font-size: 1rem; cursor: pointer; width: 100%; text-align: center; box-sizing: border-box; }
-        .controls select:focus { outline: none; border-color: #a5cff0; box-shadow: 0 0 5px rgba(165, 207, 240, 0.6); }
+        .controls { display: flex; flex-direction: column; align-items: stretch; gap: 18px; width: 100%; }
+        .control-group { display: flex; flex-direction: column; align-items: stretch; gap: 8px; width: 100%; }
+        .controls label { font-size: 0.95rem; color: var(--control-label-color); font-weight: 500; transition: color 0.3s ease; margin-bottom: 2px; text-align: left; }
+        .controls select, .controls input[type="number"] { padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 5px; background-color: var(--input-bg); color: var(--text-color); font-size: 0.95rem; cursor: pointer; width: 100%; text-align: center; box-sizing: border-box; transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+        .controls select:focus, .controls input[type="number"]:focus { outline: none; border-color: #a5cff0; box-shadow: 0 0 5px rgba(165, 207, 240, 0.6); }
+        .controls input[type="number"] { text-align: right; }
+
+        /* Custom Timings Section */
+        #custom-timing-inputs { display: none; flex-direction: row; gap: 10px; width: 100%; }
+        #custom-timing-inputs.visible { display: flex; }
+        #custom-timing-inputs .control-group { flex: 1; }
+        #custom-timing-inputs label { font-size: 0.85rem; }
+
+        /* Technique Description */
+        #technique-description { font-size: 0.85rem; color: var(--description-color); font-style: italic; margin-top: -10px; margin-bottom: 5px; min-height: 2.5em; transition: color 0.3s ease; text-align: center; }
 
         /* Buttons */
-        .control-button { padding: 12px 25px; font-size: 1rem; border: none; border-radius: 5px; cursor: pointer; background-color: var(--button-bg); color: white; transition: background-color 0.2s ease; width: 100%; box-sizing: border-box; }
+        .control-button { padding: 10px 20px; font-size: 0.95rem; border: none; border-radius: 5px; cursor: pointer; background-color: var(--button-bg); color: white; transition: background-color 0.2s ease; width: 100%; box-sizing: border-box; }
         .control-button:hover { background-color: var(--button-hover-bg); }
         .control-button.button-off { background-color: var(--button-off-bg); }
         .control-button.button-off:hover { background-color: var(--button-off-hover-bg); }
+        #reset-button { background-color: var(--reset-button-bg); }
+        #reset-button:hover { background-color: var(--reset-button-hover-bg); }
 
         /* Volume slider */
         #volume-slider { cursor: pointer; width: 100%; -webkit-appearance: none; appearance: none; height: 8px; background: var(--slider-track); border-radius: 4px; outline: none; transition: background-color 0.3s ease; }
         #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; background: var(--slider-thumb); border-radius: 50%; cursor: pointer; transition: background-color 0.3s ease; }
         #volume-slider::-moz-range-thumb { width: 18px; height: 18px; background: var(--slider-thumb); border-radius: 50%; cursor: pointer; border: none; transition: background-color 0.3s ease; }
 
-        /* Toggle Switches (Dark Mode & Vibration) */
-        .toggle-switch-group { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; /* Reduced margin */ }
+        /* Toggle Switches */
+        .toggle-switch-group { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 5px; }
         .toggle-switch-group label { margin-right: 10px; }
         .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 26px; }
         .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--switch-checked-bg); } /* Use variable */
+        input:checked + .slider { background-color: var(--switch-checked-bg); }
         input:checked + .slider:before { transform: translateX(24px); }
         /* --- End Menu System --- */
 
+        /* --- Visualizers --- */
+        .visualizer-container { width: 150px; height: 150px; max-width: 50vw; max-height: 50vw; aspect-ratio: 1 / 1; margin-bottom: 25px; margin-top: 50px; position: relative; display: flex; justify-content: center; align-items: center; }
+        .animated-circle { width: 100%; height: 100%; --center-color: #A881B4; background: radial-gradient(circle, var(--center-color), var(--circle-gradient-edge)); border-radius: 50%; position: absolute; display: flex; justify-content: center; align-items: center; transition: transform 0.2s linear, opacity 0.2s linear; opacity: 1; }
+        .animated-circle.hidden { opacity: 0; pointer-events: none; }
+        .animated-bar-container { width: 60px; height: 100%; position: absolute; display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .animated-bar-container.visible { opacity: 1; pointer-events: auto; }
+        .animated-bar { width: 100%; height: 10%; background-color: var(--bar-color); border-radius: 5px 5px 0 0; transition: height 0.2s linear, background-color 0.3s ease; }
+        #breath-text { position: relative; z-index: 10; color: white; font-size: 1.2rem; font-weight: bold; text-align: center; user-select: none; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); }
+        .animated-bar-container.visible ~ #breath-text { color: var(--text-color); text-shadow: none; }
+        /* --- End Visualizers --- */
 
-        /* Styling for the circle element */
-        .animated-circle { width: 150px; height: 150px; max-width: 50vw; max-height: 50vw; aspect-ratio: 1 / 1; margin-bottom: 25px; margin-top: 50px; --center-color: #A881B4; background: radial-gradient(circle, var(--center-color), var(--circle-gradient-edge)); border-radius: 50%; position: relative; display: flex; justify-content: center; align-items: center; transition: transform 0.2s linear, opacity 0.2s linear; }
-        #breath-text { color: white; font-size: 1.2rem; font-weight: bold; text-align: center; user-select: none; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6); }
         #calm-phrase { margin-top: 15px; margin-bottom: 30px; min-height: 2.5em; font-size: 1.1rem; color: var(--text-color); text-align: center; font-style: italic; opacity: 0; transition: opacity 0.8s ease-in-out, color 0.3s ease; }
         #calm-phrase.visible { opacity: 1; }
         #debug-info { margin-top: auto; padding: 8px 12px; background-color: var(--debug-bg); border-radius: 5px; font-family: monospace; font-size: 0.85rem; color: var(--debug-text); text-align: center; transition: background-color 0.3s ease, color 0.3s ease; }
@@ -121,18 +151,70 @@
             <div class="control-group">
                 <label for="technique-select">Breathing Technique:</label>
                 <select id="technique-select"> </select>
+                <div id="technique-description">Select a technique above.</div>
             </div>
+
+            <div id="custom-timing-inputs" class="control-group">
+                <div class="control-group">
+                    <label for="custom-inhale">Inhale (s):</label>
+                    <input type="number" id="custom-inhale" min="1" step="0.1" value="4">
+                </div>
+                <div class="control-group">
+                    <label for="custom-hold">Hold (s):</label>
+                    <input type="number" id="custom-hold" min="0" step="0.1" value="7">
+                </div>
+                <div class="control-group">
+                    <label for="custom-exhale">Exhale (s):</label>
+                    <input type="number" id="custom-exhale" min="1" step="0.1" value="8">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label for="visualizer-select">Visualizer:</label>
+                <select id="visualizer-select">
+                    <option value="circle">Circle</option>
+                    <option value="bar">Bar</option>
+                </select>
+            </div>
+
+             <div class="control-group">
+                <label for="sound-type-select">Sound Type:</label>
+                <select id="sound-type-select">
+                    <option value="brown">Brown Noise</option>
+                    <option value="pink">Pink Noise</option>
+                    <option value="white">White Noise</option>
+                    <option value="none">None</option>
+                </select>
+            </div>
+
             <div class="control-group">
                  <label for="volume-slider">Sound Volume:</label>
                  <input type="range" id="volume-slider" min="-40" max="0" value="-25" step="1">
             </div>
-             <button id="sound-toggle-button" class="control-button button-off">Start Sound</button> <div class="toggle-switch-group control-group">
+
+            <div class="control-group">
+                <label for="timer-select">Session Duration:</label>
+                <select id="timer-select">
+                    <option value="0">Infinite</option>
+                    <option value="60">1 Minute</option>
+                    <option value="180">3 Minutes</option>
+                    <option value="300">5 Minutes</option>
+                    <option value="600">10 Minutes</option>
+                </select>
+            </div>
+             <div id="timer-display" style="font-size: 0.9rem; margin-top: -10px; color: var(--description-color);"></div>
+
+
+             <button id="sound-toggle-button" class="control-button button-off">Start Sound</button>
+
+             <div class="toggle-switch-group control-group">
                  <label for="vibration-switch">Vibration:</label>
                  <label class="switch">
                      <input type="checkbox" id="vibration-switch">
                      <span class="slider"></span>
                  </label>
              </div>
+
              <div class="toggle-switch-group control-group">
                  <label for="dark-mode-switch">Dark Mode:</label>
                  <label class="switch">
@@ -140,191 +222,205 @@
                      <span class="slider"></span>
                  </label>
              </div>
-             </div>
+
+             <button id="reset-button" class="control-button">Reset Settings</button>
+
+        </div>
     </div>
 
-    <div class="animated-circle">
-        <span id="breath-text">Starting...</span>
-    </div>
+    <div class="visualizer-container">
+         <div class="animated-circle"></div> <div class="animated-bar-container"> <div class="animated-bar"></div>
+         </div>
+         <span id="breath-text">Starting...</span> </div>
     <div id="calm-phrase"></div>
     <div id="debug-info">Select a technique</div>
 
     <script>
         // --- Configuration ---
-        const techniques = { /* ... (no changes) ... */
-            'default': { name: 'Default (4-7-8)', inhale: 4, hold: 7, exhale: 8, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' },
-            'box': { name: 'Box Breathing (4-4-4)', inhale: 4, hold: 4, exhale: 4, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' },
-            'relax': { name: 'Relaxing Breath (4-2-6)', inhale: 4, hold: 2, exhale: 6, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' }
+        const defaultSettings = {
+            technique: 'default',
+            volume: -25,
+            soundType: 'brown',
+            visualizer: 'circle',
+            vibration: false,
+            theme: 'light',
+            timer: 0, // Infinite
+            customInhale: 4,
+            customHold: 7,
+            customExhale: 8
+        };
+
+        const techniques = {
+            'default': { name: 'Default (4-7-8)', description: 'Classic relaxing breath. Inhale 4s, Hold 7s, Exhale 8s.', inhale: 4, hold: 7, exhale: 8, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' },
+            'box': { name: 'Box Breathing (4-4-4)', description: 'Calming and focusing. Inhale 4s, Hold 4s, Exhale 4s.', inhale: 4, hold: 4, exhale: 4, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' },
+            'relax': { name: 'Relaxing Breath (4-2-6)', description: 'Promotes relaxation. Inhale 4s, Hold 2s, Exhale 6s.', inhale: 4, hold: 2, exhale: 6, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' },
+            'resonant': { name: 'Resonant (5.5-5.5)', description: 'Balances nervous system. Inhale 5.5s, Exhale 5.5s.', inhale: 5.5, hold: 0, exhale: 5.5, colorInhale: '#A5CFF0', colorHold: '#A5CFF0', colorExhale: '#A881B4' }, // Added Resonant
+            'custom': { name: 'Custom Timings', description: 'Set your own pace below.', inhale: 4, hold: 7, exhale: 8, colorInhale: '#A5CFF0', colorHold: '#F0C8A5', colorExhale: '#A881B4' } // Added Custom
         };
         const minScale = 0.4; const maxScale = 1.0; const pulseScale = 1.02; const pulseFrequency = 1.0;
-        const noiseType = 'brown'; const filterFreqBase = 120; const filterFreqInhale = 1200; const filterFreqHold = 1200; const filterQ = 4;
-        let currentVolume = -25;
-        const calmingPhrases = ["Be present...", "Let go...", "Breathe...", "Peace...", "Safe & calm...", "Release...", "Focus...", "Relax...", "Stillness...", "Softness..."];
-        let phraseIndex = 0; let showNewPhrase = true;
 
-        // Vibration Patterns (ms duration)
-        const vibrateInhale = [100];
-        const vibrateHold = [150]; // Slightly longer
-        const vibrateExhale = [80, 70, 80]; // Double pulse
+        // --- Sound Configuration Object ---
+        const soundConfig = {
+            filterFreqBase: 120,
+            filterFreqInhale: 1200,
+            filterFreqHold: 1200,
+            filterQ: 4
+        };
+
+        const calmingPhrases = ["Be present...", "Let go...", "Breathe...", "Peace...", "Safe & calm...", "Release...", "Focus...", "Relax...", "Stillness...", "Softness...", "All is well.", "Just be.", "Inhale calm.", "Exhale tension."]; // Expanded list
+        let phraseIndex = 0; let showNewPhrase = true;
+        const vibrateInhale = [100]; const vibrateHold = [150]; const vibrateExhale = [80, 70, 80];
 
         // --- Get DOM Elements ---
         const animatedCircle = document.querySelector('.animated-circle');
+        const animatedBarContainer = document.querySelector('.animated-bar-container');
+        const animatedBar = document.querySelector('.animated-bar');
         const breathText = document.getElementById('breath-text');
         const debugInfo = document.getElementById('debug-info');
         const techniqueSelect = document.getElementById('technique-select');
+        const techniqueDescription = document.getElementById('technique-description');
+        const customTimingInputsDiv = document.getElementById('custom-timing-inputs');
+        const customInhaleInput = document.getElementById('custom-inhale');
+        const customHoldInput = document.getElementById('custom-hold');
+        const customExhaleInput = document.getElementById('custom-exhale');
+        const visualizerSelect = document.getElementById('visualizer-select');
+        const soundTypeSelect = document.getElementById('sound-type-select');
         const soundToggleButton = document.getElementById('sound-toggle-button');
         const volumeSlider = document.getElementById('volume-slider');
+        const timerSelect = document.getElementById('timer-select');
+        const timerDisplay = document.getElementById('timer-display');
         const calmPhraseElement = document.getElementById('calm-phrase');
         const menuToggle = document.getElementById('menu-toggle');
         const menuPanel = document.getElementById('menu-panel');
         const bodyElement = document.body;
         const darkModeSwitch = document.getElementById('dark-mode-switch');
-        const vibrationSwitch = document.getElementById('vibration-switch'); // Vibration switch
+        const vibrationSwitch = document.getElementById('vibration-switch');
+        const resetButton = document.getElementById('reset-button');
 
         // --- State Variables ---
-        let currentTechniqueKey = 'default'; let currentTechnique = techniques[currentTechniqueKey];
-        let startTime = performance.now(); let animationFrameId = null; let soundEnabled = false; let toneStarted = false; let synth = null;
-        let vibrationEnabled = false; // Vibration state
-        let previousPhase = ''; // Track phase changes for vibration trigger
-        const vibrationApiSupported = 'vibrate' in navigator; // Check Vibration API support
+        let appState = {}; // Holds all current settings
+        let startTime = performance.now();
+        let animationFrameId = null;
+        let toneStarted = false;
+        let synth = null;
+        let previousPhase = '';
+        const vibrationApiSupported = 'vibrate' in navigator;
+        let sessionEndTime = 0; // 0 means infinite
+        let timerIntervalId = null; // To update timer display
+
+        // --- Utility Functions ---
+        function lerp(start, end, amount) { const clampedAmount = Math.max(0, Math.min(1, amount)); return start + (end - start) * clampedAmount; }
+        function lerpColor(hexColor1, hexColor2, amount) { const color1 = hexToRgb(hexColor1); const color2 = hexToRgb(hexColor2); if (!color1 || !color2) return hexColor1; const r = Math.round(lerp(color1.r, color2.r, amount)); const g = Math.round(lerp(color1.g, color2.g, amount)); const b = Math.round(lerp(color1.b, color2.b, amount)); return rgbToHex(r, g, b); }
+        function hexToRgb(hex) { const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
+        function componentToHex(c) { const hex = c.toString(16); return hex.length == 1 ? "0" + hex : hex; }
+        function rgbToHex(r, g, b) { return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b); }
+
+        // --- Settings Management ---
+        function saveState() { localStorage.setItem('breathingAppState', JSON.stringify(appState)); console.log("State saved:", appState); }
+        function loadState() { const savedState = localStorage.getItem('breathingAppState'); appState = savedState ? JSON.parse(savedState) : { ...defaultSettings }; for (const key in defaultSettings) { if (!(key in appState)) { appState[key] = defaultSettings[key]; } } console.log("State loaded:", appState); }
+        function applyStateToUI() { techniqueSelect.value = appState.technique; volumeSlider.value = appState.volume; soundTypeSelect.value = appState.soundType; visualizerSelect.value = appState.visualizer; timerSelect.value = appState.timer; customInhaleInput.value = appState.customInhale; customHoldInput.value = appState.customHold; customExhaleInput.value = appState.customExhale; applyTheme(appState.theme); if (vibrationApiSupported) { applyVibrationSetting(appState.vibration); } else { applyVibrationSetting(false); } updateTechniqueDetails(); updateVolume(); updateVisualizer(); updateTimerDisplay(); /* Update sound button state */ if (appState.soundEnabled) { soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off'); } else { soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } }
+        function resetToDefaults() { if (animationFrameId) cancelAnimationFrame(animationFrameId); stopSound(); stopVibration(); appState = { ...defaultSettings }; saveState(); applyStateToUI(); startTime = performance.now(); sessionEndTime = 0; previousPhase = ''; showNewPhrase = true; calmPhraseElement.classList.remove('visible'); calmPhraseElement.textContent = ''; bodyElement.classList.remove('menu-open'); animationFrameId = requestAnimationFrame(animate); console.log("Settings reset to defaults."); }
 
         // --- Populate Select Options ---
-        function populateOptions() { /* ... (no changes) ... */
-             techniqueSelect.innerHTML = ''; for (const key in techniques) { const option = document.createElement('option'); option.value = key; option.textContent = techniques[key].name; techniqueSelect.appendChild(option); } techniqueSelect.value = currentTechniqueKey;
-         }
+        function populateOptions() { techniqueSelect.innerHTML = ''; for (const key in techniques) { const option = document.createElement('option'); option.value = key; option.textContent = techniques[key].name; techniqueSelect.appendChild(option); } }
 
-        // --- Initialize Sound (Noise Synth) ---
-        function initializeSound() { /* ... (no changes) ... */
-             if (!synth) { synth = new Tone.NoiseSynth({ noise: { type: noiseType }, envelope: { attack: 0.6, decay: 0.1, sustain: 1.0, release: 1.0 }, filterEnvelope: { baseFrequency: filterFreqBase, octaves: 0, attack: 0.02, release: 0.2, filter: { Q: filterQ } }, volume: currentVolume }).toDestination(); console.log("NoiseSynth created with Q =", filterQ); }
-         }
-
-        // --- Linear Interpolation (Lerp) Function ---
-        function lerp(start, end, amount) { /* ... (no changes) ... */ const clampedAmount = Math.max(0, Math.min(1, amount)); return start + (end - start) * clampedAmount; }
-
-         // --- Color Interpolation Helper ---
-        function lerpColor(hexColor1, hexColor2, amount) { /* ... (no changes) ... */ const color1 = hexToRgb(hexColor1); const color2 = hexToRgb(hexColor2); if (!color1 || !color2) return hexColor1; const r = Math.round(lerp(color1.r, color2.r, amount)); const g = Math.round(lerp(color1.g, color2.g, amount)); const b = Math.round(lerp(color1.b, color2.b, amount)); return rgbToHex(r, g, b); }
-        function hexToRgb(hex) { /* ... (no changes) ... */ const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
-        function componentToHex(c) { /* ... (no changes) ... */ const hex = c.toString(16); return hex.length == 1 ? "0" + hex : hex; }
-        function rgbToHex(r, g, b) { /* ... (no changes) ... */ return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b); }
-
-        // --- Trigger Vibration ---
-        function triggerVibration(pattern) {
-            if (vibrationEnabled && vibrationApiSupported) {
-                try {
-                    navigator.vibrate(pattern);
-                    console.log("Vibrating:", pattern);
-                } catch (e) {
-                    console.error("Vibration failed:", e);
-                    // Optionally disable vibration toggle if it fails consistently
-                }
+        // --- Initialize Sound ---
+        function initializeSound(noiseTypeValue = appState.soundType) {
+             if(noiseTypeValue === 'none') { if(synth) { synth.dispose(); synth = null; } console.log("Sound type set to None."); return; }
+             if(synth && (!synth.noise || synth.noise.type !== noiseTypeValue)) { synth.dispose(); synth = null; }
+            if (!synth) {
+                 synth = new Tone.NoiseSynth({
+                    noise: { type: noiseTypeValue },
+                    envelope: { attack: 0.6, decay: 0.1, sustain: 1.0, release: 1.0 },
+                    filterEnvelope: {
+                         baseFrequency: soundConfig.filterFreqBase, // Use config object
+                         octaves: 0,
+                         attack: 0.02,
+                         release: 0.2,
+                         filter: { Q: soundConfig.filterQ } // Use config object
+                     },
+                    volume: appState.volume
+                }).toDestination();
+                 console.log(`NoiseSynth created/updated: Type=${noiseTypeValue}, Q=${soundConfig.filterQ}`);
             }
         }
+
+        // --- Sound Control ---
+        function startSound() { if (!appState.soundEnabled && synth && synth.state !== 'started' && appState.soundType !== 'none') { synth.triggerAttack(Tone.now()); console.log("Sound Enabled - Triggering Attack"); appState.soundEnabled = true; soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off'); } else if(appState.soundType === 'none') { console.log("Cannot start sound, type is None."); } }
+        function stopSound() { if (appState.soundEnabled && synth && synth.state === 'started') { synth.triggerRelease(Tone.now() + 0.1); console.log("Sound Disabled - Triggering Release"); appState.soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } if(appState.soundEnabled) { appState.soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } }
+
+        // --- Vibration Control ---
+        function triggerVibration(pattern) { if (appState.vibration && vibrationApiSupported) { try { navigator.vibrate(pattern); console.log("Vibrating:", pattern); } catch (e) { console.error("Vibration failed:", e); } } }
+        function stopVibration() { if (vibrationApiSupported) { navigator.vibrate(0); } }
+
+        // --- Update Functions ---
+        function updateTechniqueDetails() { const techniqueKey = appState.technique; const description = techniques[techniqueKey]?.description || ''; techniqueDescription.textContent = description; if (techniqueKey === 'custom') { customTimingInputsDiv.classList.add('visible'); } else { customTimingInputsDiv.classList.remove('visible'); } }
+        function updateVolume() { if (synth) { synth.volume.rampTo(appState.volume, 0.1); } }
+        function updateVisualizer() { if (appState.visualizer === 'circle') { animatedCircle.classList.remove('hidden'); animatedBarContainer.classList.remove('visible'); } else { animatedCircle.classList.add('hidden'); animatedBarContainer.classList.add('visible'); } }
+        function updateTimerDisplay() { clearInterval(timerIntervalId); timerDisplay.textContent = ''; if (sessionEndTime > 0) { timerIntervalId = setInterval(() => { const now = performance.now(); const remainingMs = Math.max(0, sessionEndTime - now); const remainingSeconds = Math.round(remainingMs / 1000); const minutes = Math.floor(remainingSeconds / 60); const seconds = remainingSeconds % 60; timerDisplay.textContent = `Time Left: ${minutes}:${seconds.toString().padStart(2, '0')}`; if (remainingMs <= 0) { clearInterval(timerIntervalId); timerDisplay.textContent = "Session Complete!"; } }, 1000); } }
 
         // --- Animation Loop ---
         function animate(currentTime) {
-            const inhaleDuration = currentTechnique.inhale * 1000; const holdDuration = currentTechnique.hold * 1000; const exhaleDuration = currentTechnique.exhale * 1000; const totalDuration = inhaleDuration + holdDuration + exhaleDuration; const elapsedTime = (currentTime - startTime) % totalDuration; let phase = '', phaseProgress = 0, scale = minScale, opacity = 0.8, text = '', centerColor = currentTechnique.colorExhale, targetFilterFreq = filterFreqBase;
+            if (sessionEndTime > 0 && currentTime >= sessionEndTime) { console.log("Session timer ended."); stopSound(); stopVibration(); if (animationFrameId) cancelAnimationFrame(animationFrameId); timerDisplay.textContent = "Session Complete!"; return; }
 
-            // Determine current phase and progress
+            const currentTimings = (appState.technique === 'custom') ? { inhale: appState.customInhale, hold: appState.customHold, exhale: appState.customExhale } : techniques[appState.technique];
+            const inhaleDuration = currentTimings.inhale * 1000; const holdDuration = currentTimings.hold * 1000; const exhaleDuration = currentTimings.exhale * 1000; const totalDuration = inhaleDuration + holdDuration + exhaleDuration;
+             if (totalDuration <= 0) { debugInfo.textContent = "Error: Invalid timing"; animationFrameId = requestAnimationFrame(animate); return; }
+
+            const elapsedTime = (currentTime - startTime) % totalDuration;
+            let phase = '', phaseProgress = 0, scale = minScale, opacity = 0.8, text = '', centerColor = techniques[appState.technique].colorExhale, targetFilterFreq = soundConfig.filterFreqBase, barHeight = 10; // Use soundConfig
+
             if (elapsedTime < inhaleDuration) {
-                phase = 'Inhale'; phaseProgress = elapsedTime / inhaleDuration; scale = lerp(minScale, maxScale, phaseProgress); opacity = lerp(0.8, 1.0, phaseProgress); text = 'Inhale'; centerColor = lerpColor(currentTechnique.colorExhale, currentTechnique.colorInhale, phaseProgress); targetFilterFreq = lerp(filterFreqBase, filterFreqInhale, phaseProgress);
+                phase = 'Inhale'; phaseProgress = inhaleDuration > 0 ? elapsedTime / inhaleDuration : 1; scale = lerp(minScale, maxScale, phaseProgress); barHeight = lerp(10, 100, phaseProgress); opacity = lerp(0.8, 1.0, phaseProgress); text = 'Inhale'; centerColor = lerpColor(techniques[appState.technique].colorExhale, techniques[appState.technique].colorInhale, phaseProgress);
+                targetFilterFreq = lerp(soundConfig.filterFreqBase, soundConfig.filterFreqInhale, phaseProgress); // Use soundConfig
                 if (showNewPhrase) { calmPhraseElement.classList.remove('visible'); setTimeout(() => { phraseIndex = (phraseIndex + 1) % calmingPhrases.length; calmPhraseElement.textContent = calmingPhrases[phraseIndex]; calmPhraseElement.classList.add('visible'); }, 400); showNewPhrase = false; }
             } else if (elapsedTime < inhaleDuration + holdDuration) {
-                phase = 'Hold'; const timeInHold = elapsedTime - inhaleDuration; phaseProgress = timeInHold / holdDuration; const pulseProgress = Math.sin(timeInHold / 1000 * pulseFrequency * Math.PI * 2) * 0.5 + 0.5; scale = lerp(maxScale, pulseScale, pulseProgress); opacity = 1.0; text = 'Hold'; centerColor = lerpColor(currentTechnique.colorInhale, currentTechnique.colorHold, phaseProgress); targetFilterFreq = filterFreqHold; showNewPhrase = false;
+                phase = 'Hold'; const timeInHold = elapsedTime - inhaleDuration; phaseProgress = holdDuration > 0 ? timeInHold / holdDuration : 1; const pulseProgress = Math.sin(timeInHold / 1000 * pulseFrequency * Math.PI * 2) * 0.5 + 0.5; scale = lerp(maxScale, pulseScale, pulseProgress); barHeight = 100; opacity = 1.0; text = 'Hold'; centerColor = lerpColor(techniques[appState.technique].colorInhale, techniques[appState.technique].colorHold, phaseProgress);
+                targetFilterFreq = soundConfig.filterFreqHold; // Use soundConfig
+                 showNewPhrase = false;
             } else {
-                phase = 'Exhale'; const timeInExhale = elapsedTime - (inhaleDuration + holdDuration); phaseProgress = timeInExhale / exhaleDuration; scale = lerp(maxScale, minScale, phaseProgress); opacity = lerp(1.0, 0.8, phaseProgress); text = 'Exhale'; centerColor = lerpColor(currentTechnique.colorHold, currentTechnique.colorExhale, phaseProgress); targetFilterFreq = lerp(filterFreqHold, filterFreqBase, phaseProgress);
+                phase = 'Exhale'; const timeInExhale = elapsedTime - (inhaleDuration + holdDuration); phaseProgress = exhaleDuration > 0 ? timeInExhale / exhaleDuration : 1; scale = lerp(maxScale, minScale, phaseProgress); barHeight = lerp(100, 10, phaseProgress); opacity = lerp(1.0, 0.8, phaseProgress); text = 'Exhale'; centerColor = lerpColor(techniques[appState.technique].colorHold, techniques[appState.technique].colorExhale, phaseProgress);
+                targetFilterFreq = lerp(soundConfig.filterFreqHold, soundConfig.filterFreqBase, phaseProgress); // Use soundConfig
                 if (phaseProgress > 0.9) { showNewPhrase = true; }
             }
 
-            // --- Trigger Vibration on Phase Change ---
-            if (phase !== previousPhase) {
-                switch (phase) {
-                    case 'Inhale': triggerVibration(vibrateInhale); break;
-                    case 'Hold': triggerVibration(vibrateHold); break;
-                    case 'Exhale': triggerVibration(vibrateExhale); break;
-                }
-                previousPhase = phase; // Update after checking
-            }
+            if (phase !== previousPhase) { switch (phase) { case 'Inhale': triggerVibration(vibrateInhale); break; case 'Hold': triggerVibration(vibrateHold); break; case 'Exhale': triggerVibration(vibrateExhale); break; } previousPhase = phase; }
 
-            // Apply visual styles
-            animatedCircle.style.transform = `scale(${scale})`; animatedCircle.style.opacity = opacity; animatedCircle.style.setProperty('--center-color', centerColor); breathText.textContent = text;
-            // Sound Logic
-            if (soundEnabled && synth && synth.state === 'started') { if (synth.filterEnvelope && synth.filterEnvelope.baseFrequency) { synth.filterEnvelope.baseFrequency.rampTo(targetFilterFreq, 0.3); } else { console.warn("Synth filterEnvelope or baseFrequency not available for ramping."); } }
-            // Debug Info
+             if (appState.visualizer === 'circle') { animatedCircle.style.transform = `scale(${scale})`; animatedCircle.style.opacity = opacity; animatedCircle.style.setProperty('--center-color', centerColor); }
+             else { animatedBar.style.height = `${barHeight}%`; }
+            breathText.textContent = text;
+
+            if (appState.soundEnabled && synth && synth.state === 'started') { if (synth.filterEnvelope && synth.filterEnvelope.baseFrequency) { synth.filterEnvelope.baseFrequency.rampTo(targetFilterFreq, 0.3); } else { console.warn("Filter envelope not available."); } }
             const cyclePercent = (elapsedTime / totalDuration) * 100; debugInfo.textContent = `Stage: ${phase} | Cycle: ${cyclePercent.toFixed(1)}%`;
-            // Loop
             animationFrameId = requestAnimationFrame(animate);
         }
 
-        // --- Menu Toggle Logic ---
-        menuToggle.addEventListener('click', () => { /* ... (no changes) ... */ bodyElement.classList.toggle('menu-open'); });
-
-        // --- Close Menu if Clicking Outside ---
-        document.addEventListener('click', (event) => { /* ... (no changes) ... */ if (bodyElement.classList.contains('menu-open') && !menuPanel.contains(event.target) && !menuToggle.contains(event.target)) { bodyElement.classList.remove('menu-open'); } });
-
-        // --- Event Listener for Select Change ---
-        techniqueSelect.addEventListener('change', (event) => { /* ... (no changes) ... */ if (animationFrameId) cancelAnimationFrame(animationFrameId); if (soundEnabled && synth && synth.state === 'started') { synth.triggerRelease(Tone.now()); console.log("Technique Changed - Triggering Release"); soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } currentTechniqueKey = event.target.value; currentTechnique = techniques[currentTechniqueKey]; startTime = performance.now(); showNewPhrase = true; calmPhraseElement.classList.remove('visible'); calmPhraseElement.textContent = ''; bodyElement.classList.remove('menu-open'); previousPhase = ''; animationFrameId = requestAnimationFrame(animate); }); // Reset previousPhase
-
-         // --- Event Listener for Sound Toggle ---
-        soundToggleButton.addEventListener('click', async () => { /* ... (no changes) ... */ if (!toneStarted) { try { await Tone.start(); initializeSound(); toneStarted = true; console.log("AudioContext started."); } catch (e) { console.error("Tone.start() failed:", e); soundToggleButton.textContent = 'Sound Error'; soundToggleButton.disabled = true; return; } } if (!synth) { console.error("Synth not initialized."); if (toneStarted) initializeSound(); if (!synth) return; } if (!soundEnabled) { if (synth.state !== 'started') { synth.triggerAttack(Tone.now()); console.log("Sound Enabled - Triggering Attack"); soundEnabled = true; soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off'); } else { console.log("Sound already started?"); soundEnabled = true; soundToggleButton.textContent = 'Stop Sound'; soundToggleButton.classList.remove('button-off');} } else { if (synth.state === 'started') { synth.triggerRelease(Tone.now() + 0.1); console.log("Sound Disabled - Triggering Release"); soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off'); } else { console.log("Sound already stopped?"); soundEnabled = false; soundToggleButton.textContent = 'Start Sound'; soundToggleButton.classList.add('button-off');} } });
-
-        // --- Event Listener for Volume Slider ---
-        volumeSlider.addEventListener('input', (event) => { /* ... (no changes) ... */ currentVolume = parseFloat(event.target.value); if (synth) { synth.volume.rampTo(currentVolume, 0.1); } console.log("Volume set to:", currentVolume); });
-
-        // --- Dark Mode Logic ---
-        function applyTheme(theme) { /* ... (no changes) ... */ if (theme === 'dark') { bodyElement.classList.add('dark-mode'); darkModeSwitch.checked = true; } else { bodyElement.classList.remove('dark-mode'); darkModeSwitch.checked = false; } }
-        darkModeSwitch.addEventListener('change', () => { /* ... (no changes) ... */ const selectedTheme = darkModeSwitch.checked ? 'dark' : 'light'; localStorage.setItem('theme', selectedTheme); applyTheme(selectedTheme); });
-
-        // --- Vibration Logic ---
-        function applyVibrationSetting(enabled) {
-            vibrationEnabled = enabled;
-            vibrationSwitch.checked = enabled;
-            // If disabling vibration, cancel any ongoing vibration immediately
-            if (!enabled && vibrationApiSupported) {
-                navigator.vibrate(0);
-            }
-            console.log("Vibration Enabled:", vibrationEnabled);
-        }
-
-        vibrationSwitch.addEventListener('change', () => {
-            const isEnabled = vibrationSwitch.checked;
-            localStorage.setItem('vibrationEnabled', isEnabled); // Save preference
-            applyVibrationSetting(isEnabled);
-            // Optional: Trigger a short confirmation vibration when enabled
-            if (isEnabled) {
-                triggerVibration([50]);
-            }
-        });
-
-        // Disable vibration toggle if API not supported
-        if (!vibrationApiSupported) {
-            const vibrationToggleGroup = vibrationSwitch.closest('.toggle-switch-group');
-            if (vibrationToggleGroup) {
-                vibrationToggleGroup.style.opacity = '0.5';
-                vibrationToggleGroup.style.pointerEvents = 'none';
-                // Add a title to explain why it's disabled
-                 const label = vibrationToggleGroup.querySelector('label');
-                 if(label) label.title = "Vibration not supported on this device/browser.";
-            }
-            console.warn("Vibration API not supported.");
-        }
-
+        // --- Event Listeners ---
+        menuToggle.addEventListener('click', () => { bodyElement.classList.toggle('menu-open'); });
+        document.addEventListener('click', (event) => { if (bodyElement.classList.contains('menu-open') && !menuPanel.contains(event.target) && !menuToggle.contains(event.target)) { bodyElement.classList.remove('menu-open'); } });
+        techniqueSelect.addEventListener('change', (event) => { if (animationFrameId) cancelAnimationFrame(animationFrameId); stopSound(); stopVibration(); appState.technique = event.target.value; updateTechniqueDetails(); startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; updateTimerDisplay(); previousPhase = ''; showNewPhrase = true; calmPhraseElement.classList.remove('visible'); calmPhraseElement.textContent = ''; saveState(); bodyElement.classList.remove('menu-open'); animationFrameId = requestAnimationFrame(animate); });
+        soundTypeSelect.addEventListener('change', (event) => { appState.soundType = event.target.value; const wasEnabled = appState.soundEnabled; stopSound(); initializeSound(appState.soundType); if(wasEnabled && appState.soundType !== 'none') { startSound(); } saveState(); });
+        visualizerSelect.addEventListener('change', (event) => { appState.visualizer = event.target.value; updateVisualizer(); saveState(); });
+        timerSelect.addEventListener('change', (event) => { appState.timer = parseInt(event.target.value, 10); startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; updateTimerDisplay(); saveState(); if (animationFrameId) cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(animate); });
+        [customInhaleInput, customHoldInput, customExhaleInput].forEach(input => { input.addEventListener('change', () => { if (appState.technique === 'custom') { appState.customInhale = parseFloat(customInhaleInput.value) || defaultSettings.customInhale; appState.customHold = parseFloat(customHoldInput.value) || defaultSettings.customHold; appState.customExhale = parseFloat(customExhaleInput.value) || defaultSettings.customExhale; if (appState.customInhale <= 0) appState.customInhale = 0.1; if (appState.customHold < 0) appState.customHold = 0; if (appState.customExhale <= 0) appState.customExhale = 0.1; customInhaleInput.value = appState.customInhale; customHoldInput.value = appState.customHold; customExhaleInput.value = appState.customExhale; startTime = performance.now(); sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; previousPhase = ''; saveState(); if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = requestAnimationFrame(animate); } console.log("Custom timings updated:", appState); } else { appState.customInhale = parseFloat(customInhaleInput.value) || defaultSettings.customInhale; appState.customHold = parseFloat(customHoldInput.value) || defaultSettings.customHold; appState.customExhale = parseFloat(customExhaleInput.value) || defaultSettings.customExhale; saveState(); } }); });
+        soundToggleButton.addEventListener('click', async () => { if (!toneStarted) { try { await Tone.start(); initializeSound(); toneStarted = true; console.log("AudioContext started."); } catch (e) { console.error("Tone.start() failed:", e); soundToggleButton.textContent = 'Sound Error'; soundToggleButton.disabled = true; return; } } if (!synth && appState.soundType !== 'none') { console.error("Synth not initialized."); if (toneStarted) initializeSound(); if (!synth) return; } if (!appState.soundEnabled) { startSound(); } else { stopSound(); } saveState(); });
+        volumeSlider.addEventListener('input', (event) => { appState.volume = parseFloat(event.target.value); updateVolume(); saveState(); console.log("Volume set to:", appState.volume); });
+        function applyTheme(theme) { if (theme === 'dark') { bodyElement.classList.add('dark-mode'); darkModeSwitch.checked = true; } else { bodyElement.classList.remove('dark-mode'); darkModeSwitch.checked = false; } appState.theme = theme; }
+        darkModeSwitch.addEventListener('change', () => { const selectedTheme = darkModeSwitch.checked ? 'dark' : 'light'; applyTheme(selectedTheme); saveState(); });
+        function applyVibrationSetting(enabled) { appState.vibration = enabled; vibrationSwitch.checked = enabled; if (!enabled && vibrationApiSupported) { navigator.vibrate(0); } console.log("Vibration Enabled:", appState.vibration); }
+        vibrationSwitch.addEventListener('change', () => { const isEnabled = vibrationSwitch.checked; applyVibrationSetting(isEnabled); saveState(); if (isEnabled) { triggerVibration([50]); } });
+        if (!vibrationApiSupported) { const vibrationToggleGroup = vibrationSwitch.closest('.toggle-switch-group'); if (vibrationToggleGroup) { vibrationToggleGroup.style.opacity = '0.5'; vibrationToggleGroup.style.pointerEvents = 'none'; const label = vibrationToggleGroup.querySelector('label'); if(label) label.title = "Vibration not supported."; } console.warn("Vibration API not supported."); }
+        resetButton.addEventListener('click', resetToDefaults);
 
         // --- Initialization ---
-        populateOptions();
-        volumeSlider.value = currentVolume;
-        // Apply saved theme
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        applyTheme(savedTheme);
-        // Apply saved vibration setting
-        const savedVibration = localStorage.getItem('vibrationEnabled') === 'true'; // Convert string to boolean
-        if (vibrationApiSupported) { // Only apply if supported
-             applyVibrationSetting(savedVibration);
-        } else {
-             applyVibrationSetting(false); // Ensure it's off if not supported
-        }
-        // Initialize animation loop
-        startTime = performance.now();
-        animationFrameId = requestAnimationFrame(animate);
+        loadState(); // Load saved settings or defaults
+        populateOptions(); // Populate dropdowns
+        applyStateToUI(); // Apply loaded state to UI elements
+        initializeSound(); // Initialize synth based on loaded state
+        startTime = performance.now(); // Set initial start time
+        sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; // Set initial session end time
+        updateTimerDisplay(); // Start timer display if needed
+        animationFrameId = requestAnimationFrame(animate); // Start the animation loop
 
     </script>
 </body>
