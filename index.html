@@ -195,6 +195,33 @@
         .modal-content p, .modal-content ul { font-size: 0.95rem; line-height: 1.6; }
         .modal-content ul { padding-left: 20px; }
         /* --- End Instructions Modal --- */
+        .fullscreen-indicator {
+            position: fixed;
+            bottom: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background-color: var(--menu-toggle-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0.7;
+            z-index: 50;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .fullscreen-indicator:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .fullscreen-indicator::before {
+            content: '';
+            width: 14px;
+            height: 14px;
+            border: 2px solid white;
+            border-radius: 1px;
+        }
 
     </style>
 </head>
@@ -277,6 +304,10 @@
                  <label for="dark-mode-switch">Dark Mode:</label>
                  <label class="switch"><input type="checkbox" id="dark-mode-switch"><span class="slider"></span></label>
              </div>
+            <div class="toggle-switch-group control-group">
+                <label for="fullscreen-switch">Fullscreen Mode:</label>
+                <label class="switch"><input type="checkbox" id="fullscreen-switch"><span class="slider"></span></label>
+            </div>
              <button id="reset-button" class="control-button">Reset Settings</button>
         </div>
     </div>
@@ -585,6 +616,79 @@
         sessionEndTime = (appState.timer > 0) ? startTime + appState.timer * 1000 : 0; // Set initial session end time
         updateTimerDisplay(); // Start timer display if needed
         animationFrameId = requestAnimationFrame(animate); // Start the animation loop
+
+        // --- Fullscreen Feature ---
+        const fullscreenSwitch = document.getElementById('fullscreen-switch');
+        let fullscreenIndicator = null;
+        
+        function createFullscreenIndicator() {
+            if (fullscreenIndicator) return;
+            fullscreenIndicator = document.createElement('div');
+            fullscreenIndicator.className = 'fullscreen-indicator';
+            fullscreenIndicator.title = 'Exit Fullscreen (or press Esc)';
+            fullscreenIndicator.addEventListener('click', toggleFullscreen);
+            document.body.appendChild(fullscreenIndicator);
+        }
+        
+        function removeFullscreenIndicator() {
+            if (fullscreenIndicator) {
+                fullscreenIndicator.remove();
+                fullscreenIndicator = null;
+            }
+        }
+        
+        async function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                try {
+                    await document.documentElement.requestFullscreen();
+                    createFullscreenIndicator();
+                    if (fullscreenSwitch) fullscreenSwitch.checked = true;
+                    bodyElement.classList.remove('menu-open'); // Close menu when entering fullscreen
+                } catch (e) {
+                    console.error('Fullscreen request failed:', e);
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                    removeFullscreenIndicator();
+                    if (fullscreenSwitch) fullscreenSwitch.checked = false;
+                }
+            }
+        }
+        
+        document.addEventListener('fullscreenchange', () => {
+            if (!document.fullscreenElement) {
+                removeFullscreenIndicator();
+                if (fullscreenSwitch) fullscreenSwitch.checked = false;
+            } else {
+                createFullscreenIndicator();
+                if (fullscreenSwitch) fullscreenSwitch.checked = true;
+            }
+        });
+        
+        fullscreenSwitch.addEventListener('change', toggleFullscreen);
+        
+        // Add fullscreen state to settings
+        appState.fullscreen = false;
+        defaultSettings.fullscreen = false;
+        
+        // Add to applyStateToUI
+        function applyFullscreenSetting(enabled) {
+            if (enabled && !document.fullscreenElement) {
+                toggleFullscreen();
+            } else if (!enabled && document.fullscreenElement) {
+                toggleFullscreen();
+            }
+        }
+        
+        // Update applyStateToUI function to include
+        // applyFullscreenSetting(appState.fullscreen);
+        
+        // Add to settings
+        fullscreenSwitch.addEventListener('change', () => {
+            appState.fullscreen = fullscreenSwitch.checked;
+            saveState();
+        });
 
     </script>
 </body>
